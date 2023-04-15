@@ -1,0 +1,8 @@
+deps/
+deps.clean*/
+.idea/
+.cmake/
+cmake-build-*/
+.ninja*
+*.ninja
+Testing/

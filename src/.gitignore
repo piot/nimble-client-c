@@ -1,0 +1,10 @@
+.idea/
+Makefile
+build/
+CMakeFiles/
+.vscode/
+CMakeCache.txt
+cmake_install.cmake
+
+
+nimble_client_example
