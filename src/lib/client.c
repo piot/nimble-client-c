@@ -128,21 +128,20 @@ static void showStats(NimbleClient* self)
     statsIntPerSecondDebugOutput(&self->simulationStepsPerSecond, "SIM In", "steps/s");
 }
 
-static void calcStats(NimbleClient* self)
+static void calcStats(NimbleClient* self, MonotonicTimeMs now)
 {
-    MonotonicTimeMs now = monotonicTimeMsNow();
     statsIntPerSecondUpdate(&self->packetsPerSecondOut, now);
     statsIntPerSecondUpdate(&self->packetsPerSecondIn, now);
     statsIntPerSecondUpdate(&self->simulationStepsPerSecond, now);
 }
 
-static int sendPackets(NimbleClient* self, MonotonicTimeMs now)
+static int sendPackets(NimbleClient* self)
 {
     UdpTransportOut transportOut;
     transportOut.self = self->transport.self;
     transportOut.send = self->transport.send;
 
-    int errorCode = nimbleClientOutgoing(self, now, &transportOut);
+    int errorCode = nimbleClientOutgoing(self, &transportOut);
     if (errorCode < 0) {
         return errorCode;
     }
@@ -180,10 +179,9 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 
     // CLOG_INFO("nimble client update ===========");
 
-    calcStats(self);
+    calcStats(self, now);
     showStats(self);
-
-    sendPackets(self, now);
+    sendPackets(self);
 
     // CLOG_INFO("------ nimble client");
 

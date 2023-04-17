@@ -9,5 +9,4 @@ struct NimbleClient;
 
 int nimbleClientReceiveAllInUdpBuffer(struct NimbleClient* self);
 
-
 #endif

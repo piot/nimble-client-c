@@ -52,7 +52,7 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 /// It tries to go from the current state to the targetState
 /// @param self
 /// @param now
-/// @param targetFps
+/// @param targetFps the recommended tick-rate given the conditions
 void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, size_t* targetFps)
 {
     if (self->state != NimbleClientRealizeStateCleared && self->targetState != NimbleClientRealizeStateInit) {

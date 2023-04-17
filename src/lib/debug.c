@@ -8,22 +8,21 @@
 
 static const char* stateToString(NimbleClientState state)
 {
-    switch (state) {
-        case NimbleClientStateIdle:
-            return "idle";
-        case NimbleClientStateJoiningGame:
-            return "joining game";
-        case NimbleClientStateJoinedGame:
-            return "joined game";
-        case NimbleClientStatePlaying:
-            return "playing the game";
-        case NimbleClientStateJoiningRequestingState:
-            return "requesting start downloading state from server";
-        case NimbleClientStateJoiningDownloadingState:
-            return "downloading state from server";
+    static const char* lookup[] = {
+        "idle",
+        "joining game",
+        "joined game",
+        "playing the game",
+        "requesting start downloading state from server",
+        "downloading state from server",
+        "playing"
+    };
+
+    if (state < 0 || state >= sizeof(lookup)/sizeof(lookup[0])) {
+        CLOG_ERROR("unknown nimble client state: %02X", state)
     }
 
-    CLOG_ERROR("unknown nimble client state: %02X", state)
+    return lookup[state];
 }
 
 void nimbleClientDebugOutput(const NimbleClient* self)

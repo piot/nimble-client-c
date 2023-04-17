@@ -7,7 +7,7 @@
 #include <flood/in_stream.h>
 #include <nimble-steps-serialize/pending_in_serialize.h>
 
-/// Handle game step response (NimbleSerializeCmdGameStepResponse) from server.
+/// Handle game step response (`NimbleSerializeCmdGameStepResponse`) from server.
 /// Stream contains authoritative Steps from the server.
 /// @param self
 /// @param inStream
@@ -51,7 +51,7 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
         CLOG_ERROR("nbsPendingStepsCopy failed: %d", copyResult)
     }
 
-    statsIntAdd(&self->waitingStepsFromServer, self->authoritativeStepsFromServer.stepsCount);
+    statsIntAdd(&self->waitingStepsFromServer, (int)self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
         //        CLOG_DEBUG("last added into")

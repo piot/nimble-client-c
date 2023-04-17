@@ -5,6 +5,7 @@ CMakeFiles/
 .vscode/
 CMakeCache.txt
 cmake_install.cmake
-
+html/
+latex/
 
 nimble_client_example

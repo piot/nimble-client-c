@@ -2,6 +2,7 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+#include "nimble-serialize/debug.h"
 #include <nimble-client/client.h>
 #include <nimble-client/incoming.h>
 #include <nimble-client/receive_transport.h>
@@ -20,11 +21,13 @@ int nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
             if (self->useStats) {
                 statsIntPerSecondAdd(&self->packetsPerSecondIn, 1);
             }
-            // nimbleSerializeDebugHex("received", receiveBuf, octetCount);
+#if 0
+            nimbleSerializeDebugHex("received", receiveBuf, octetCount);
+#endif
             nimbleClientFeed(self, receiveBuf, octetCount);
             count++;
         } else if (octetCount < 0) {
-            printf("error: %d\n", octetCount);
+            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %d", octetCount);
             return octetCount;
         } else {
             break;
