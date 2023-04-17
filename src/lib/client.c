@@ -43,6 +43,9 @@ void nimbleClientReset(NimbleClient* self)
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
     self->joinedGameState.gameState = 0;
+
+    orderedDatagramInLogicInit(&self->orderedDatagramIn);
+    orderedDatagramOutLogicInit(&self->orderedDatagramOut);
 }
 
 void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
@@ -94,6 +97,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->joinedGameState.gameState = 0;
 
     nimbleClientReset(self);
+
+
 
     return 0;
 }

@@ -47,6 +47,7 @@ target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/monotonic-time-c
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/stats-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/nimble-steps-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/blob-stream/src/include)
+target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/ordered-datagram-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/bit-array/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/nimble-serialize-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/nimble-steps-serialize-c/src/include)

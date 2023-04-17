@@ -5,6 +5,8 @@
 #ifndef NIMBLE_CLIENT_H
 #define NIMBLE_CLIENT_H
 
+#include <ordered-datagram/out_logic.h>
+#include <ordered-datagram/in_logic.h>
 #include <blob-stream/blob_stream_logic_in.h>
 #include <blob-stream/blob_stream_logic_out.h>
 #include <clog/clog.h>
@@ -85,6 +87,9 @@ typedef struct NimbleClient {
     uint8_t participantsConnectionIndex;
 
     NimbleSerializeGameJoinOptions joinGameOptions;
+
+    OrderedDatagramOutLogic orderedDatagramOut;
+    OrderedDatagramInLogic orderedDatagramIn;
 
     Clog clog;
 

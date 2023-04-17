@@ -10,6 +10,7 @@
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
 #include <nimble-client/send_steps.h>
+#include <ordered-datagram/out_logic.h>
 
 #define DEBUG_PREFIX "Outgoing"
 
@@ -80,13 +81,15 @@ static TC_FORCE_INLINE int handleState(NimbleClient* self, UdpTransportOut* tran
         default: {
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
+            orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
             int result = sendMessageUsingStream(self, &outStream);
             if (result < 0) {
                 return result;
             }
-            if (outStream.pos == 0) {
+            if (outStream.pos <= 2) {
                 return 0;
             }
+            orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
             return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
         }
     }

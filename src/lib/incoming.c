@@ -13,16 +13,25 @@
 #include <nimble-client/incoming.h>
 #include <nimble-serialize/debug.h>
 
-
 int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 {
     FldInStream inStream;
     fldInStreamInit(&inStream, data, len);
 
+    int idDelta = orderedDatagramInLogicReceive(&self->orderedDatagramIn, &inStream);
+
     uint8_t cmd;
     fldInStreamReadUInt8(&inStream, &cmd);
     CLOG_INFO("nimbleClient: cmd: %s", nimbleSerializeCmdToString(cmd));
-    switch (data[0]) {
+    if (idDelta <= 0) {
+        CLOG_NOTICE("packets received duplicate or out of order")
+        return -91;
+    } else if (idDelta > 1) {
+        CLOG_NOTICE("packets were dropped, but accepting this one")
+    }
+
+
+    switch (cmd) {
         case NimbleSerializeCmdGameStatePart:
             return nimbleClientOnDownloadGameStatePart(self, &inStream);
         case NimbleSerializeCmdGameStepResponse:

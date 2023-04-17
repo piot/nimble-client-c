@@ -63,7 +63,8 @@ int nimbleClientSendStepsToServer(NimbleClient* self, UdpTransportOut* transport
     static uint8_t buf[UDP_MAX_SIZE];
     FldOutStream outStream;
     fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
-
+    orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
     sendStepsToStream(self, &outStream);
+    orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
     return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
 }

@@ -23,8 +23,21 @@ version = "*"
 name = 'piot/udp-transport'
 version = "*"
 
+[[dependencies]]
+name = 'piot/blob-stream'
+version = "*"
+
+
+[[dependencies]]
+name = 'piot/ordered-datagram-c'
+version = "*"
+
 [[development]]
 name = 'piot/imprint'
+version = "*"
+
+[[development]]
+name = 'piot/monotonic-time-c'
 version = "*"
 
 [[development]]
