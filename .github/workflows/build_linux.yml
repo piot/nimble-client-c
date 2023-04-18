@@ -22,7 +22,7 @@ jobs:
           go-version: 1.18
 
       - name: deps fetch dependencies
-        run: go run github.com/piot/deps/src/deps@main fetch -m clone
+        run: go run github.com/piot/deps/src/deps@main fetch -m clone --dev
         env:
           GITHUB_TOKEN: ${{secrets.DEPS_PAT}}
 
