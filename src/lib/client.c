@@ -87,18 +87,17 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
 {
     clogInitFromGlobal(&self->clog, "NimbleClient");
     self->memory = memory;
-    self->state = NimbleClientStateIdle;
-    self->transport = *transport;
     self->blobStreamAllocator = blobAllocator;
-
-    nbsStepsInit(&self->outSteps, memory, 3 * 1024);
-    nbsPendingStepsInit(&self->authoritativePendingStepsFromServer, 0, blobAllocator);
-    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, 128);
     self->joinedGameState.gameState = 0;
 
     nimbleClientReset(self);
 
+    self->state = NimbleClientStateIdle;
+    self->transport = *transport;
 
+    nbsStepsInit(&self->outSteps, memory, 3 * 1024);
+    nbsPendingStepsInit(&self->authoritativePendingStepsFromServer, 0, blobAllocator);
+    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, 128);
 
     return 0;
 }
