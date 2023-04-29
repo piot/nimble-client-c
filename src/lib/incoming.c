@@ -22,14 +22,13 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     uint8_t cmd;
     fldInStreamReadUInt8(&inStream, &cmd);
-    CLOG_INFO("nimbleClient: cmd: %s", nimbleSerializeCmdToString(cmd));
+    CLOG_C_VERBOSE(&self->log, "nimbleClient: cmd: %s", nimbleSerializeCmdToString(cmd));
     if (idDelta <= 0) {
-        CLOG_NOTICE("packets received duplicate or out of order")
+        CLOG_C_NOTICE(&self->log, "packets received duplicate or out of order")
         return -91;
     } else if (idDelta > 1) {
-        CLOG_NOTICE("packets were dropped, but accepting this one")
+        CLOG_C_NOTICE(&self->log, "packets were dropped, but accepting this one")
     }
-
 
     switch (cmd) {
         case NimbleSerializeCmdGameStatePart:

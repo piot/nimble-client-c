@@ -38,7 +38,7 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     CLOG_VERBOSE("rejoin answer: stateId: %04X octetCount:%u channel:%02X", stateId, octetCount, channelId)
 
-    blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE);
+    blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE, self->log);
     blobStreamLogicInInit(&self->blobStreamInLogic, &self->blobStreamIn);
 
     self->joinedGameState.stepId = stateId;
