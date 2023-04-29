@@ -14,7 +14,9 @@ void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealiz
     self->targetState = NimbleClientRealizeStateInit;
     self->state = NimbleClientRealizeStateInit;
     self->settings = *settings;
-    nimbleClientInit(&self->client, settings->memory, settings->blobMemory,  &self->settings.transport);
+    nimbleClientInit(&self->client, settings->memory, settings->blobMemory, &self->settings.transport,
+                     settings->maximumSingleParticipantStepOctetCount, settings->maximumNumberOfParticipants,
+                     settings->log);
 }
 
 void nimbleClientRealizeReInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings)
@@ -64,8 +66,7 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, s
         *targetFps = 70;
     }
 
-    if (self->targetState == self->state)
-    {
+    if (self->targetState == self->state) {
         return;
     }
 
@@ -83,12 +84,10 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, s
             if (self->client.state == NimbleClientStateJoinedGame) {
                 self->client.state = NimbleClientStateJoiningRequestingState;
             }
-            if (self->client.state == NimbleClientStatePlaying)
-            {
+            if (self->client.state == NimbleClientStatePlaying) {
                 self->state = self->targetState;
             }
         default:
             break;
     }
 }
-

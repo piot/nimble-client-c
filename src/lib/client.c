@@ -6,12 +6,16 @@
 #include <monotonic-time/monotonic_time.h>
 #include <nimble-client/client.h>
 #include <nimble-client/outgoing.h>
+#include <nimble-steps-serialize/out_serialize.h>
 
 void nimbleClientReset(NimbleClient* self)
 {
     nbsStepsReset(&self->outSteps);
     nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, 0);
-    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, 128);
+
+    size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(
+        self->maximumNumberOfParticipants, self->maximumSingleParticipantStepOctetCount);
+    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, self->log);
 
     self->receivedStepIdByServerOnlyForDebug = NIMBLE_STEP_MAX;
 
@@ -52,7 +56,9 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 {
     nbsStepsReInit(&self->outSteps, 0);
     nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, 0);
-    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, 128);
+    size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(
+        self->maximumNumberOfParticipants, self->maximumSingleParticipantStepOctetCount);
+    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, self->log);
 
     self->receivedStepIdByServerOnlyForDebug = NIMBLE_STEP_MAX;
 
@@ -83,21 +89,42 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 }
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
-                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport)
+                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
+                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants, Clog log)
 {
-    clogInitFromGlobal(&self->clog, "NimbleClient");
+    self->log = log;
+
+    const size_t maximumSingleStepCountAllowed = 24;
+    if (maximumSingleParticipantStepOctetCount > maximumSingleStepCountAllowed) {
+        CLOG_C_ERROR(&self->log, "nimbleClientInit. Single step octet count is not allowed %zu of %zu",
+                     maximumSingleParticipantStepOctetCount, maximumSingleStepCountAllowed)
+        return -1;
+    }
+
+    const size_t maximumNumberOfParticipantsAllowed = 64;
+    if (maximumNumberOfParticipants > maximumNumberOfParticipantsAllowed) {
+        CLOG_C_ERROR(&self->log, "nimbleClientInit. maximum number of participant count is too high: %zu of %zu",
+                     maximumNumberOfParticipants, maximumNumberOfParticipantsAllowed)
+        return -1;
+    }
+
     self->memory = memory;
     self->blobStreamAllocator = blobAllocator;
     self->joinedGameState.gameState = 0;
+    self->maximumSingleParticipantStepOctetCount = maximumSingleParticipantStepOctetCount;
+    self->maximumNumberOfParticipants = maximumNumberOfParticipants;
 
     nimbleClientReset(self);
 
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
 
-    nbsStepsInit(&self->outSteps, memory, 3 * 1024);
-    nbsPendingStepsInit(&self->authoritativePendingStepsFromServer, 0, blobAllocator);
-    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, 128);
+    size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(maximumNumberOfParticipants,
+                                                                              maximumSingleParticipantStepOctetCount);
+
+    nbsStepsInit(&self->outSteps, memory, combinedStepOctetCount, log);
+    nbsPendingStepsInit(&self->authoritativePendingStepsFromServer, 0, blobAllocator, log);
+    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, log);
 
     return 0;
 }

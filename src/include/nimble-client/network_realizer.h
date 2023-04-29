@@ -23,6 +23,9 @@ typedef struct NimbleClientRealizeSettings {
     UdpTransportInOut transport;
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobMemory;
+    size_t maximumSingleParticipantStepOctetCount;
+    size_t maximumNumberOfParticipants;
+    Clog log;
 } NimbleClientRealizeSettings;
 
 typedef struct NimbleClientRealize {

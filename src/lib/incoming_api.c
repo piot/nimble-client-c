@@ -8,4 +8,3 @@ int nimbleClientReadStep(NimbleClient* self, uint8_t* target, size_t maxTarget, 
 {
     return nbsStepsRead(&self->authoritativeStepsFromServer, outStepId, target, maxTarget);
 }
-

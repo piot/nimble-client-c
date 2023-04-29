@@ -3,8 +3,8 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 #include <clog/clog.h>
-#include <nimble-client/game_state.h>
 #include <imprint/allocator.h>
+#include <nimble-client/game_state.h>
 
 void nimbleClientGameStateInit(NimbleClientGameState* self, struct ImprintAllocatorWithFree* blobAllocator,
                                StepId stepId, const uint8_t* gameState, size_t gameStateOctetCount)

@@ -5,8 +5,8 @@
 #ifndef NIMBLE_CLIENT_GAME_STATE_H
 #define NIMBLE_CLIENT_GAME_STATE_H
 
-#include <stdint.h>
 #include <nimble-steps/steps.h>
+#include <stdint.h>
 
 typedef struct NimbleClientGameState {
     const uint8_t* gameState;
@@ -15,8 +15,8 @@ typedef struct NimbleClientGameState {
     struct ImprintAllocatorWithFree* blobAllocator;
 } NimbleClientGameState;
 
-void nimbleClientGameStateInit(NimbleClientGameState* self, struct ImprintAllocatorWithFree* blobAllocator, StepId stepId, const uint8_t* gameState,
-                               size_t gameStateOctetCount);
+void nimbleClientGameStateInit(NimbleClientGameState* self, struct ImprintAllocatorWithFree* blobAllocator,
+                               StepId stepId, const uint8_t* gameState, size_t gameStateOctetCount);
 void nimbleClientGameStateReset(NimbleClientGameState* self);
 void nimbleClientGameStateDestroy(NimbleClientGameState* self);
 void nimbleClientGameStateDebug(const NimbleClientGameState* self, const char* debug);

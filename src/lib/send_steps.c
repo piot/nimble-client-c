@@ -5,17 +5,17 @@
 #include <clog/clog.h>
 #include <flood/out_stream.h>
 #include <nimble-client/client.h>
+#include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
-#include <nimble-client/send_steps.h>
 
 static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
     StepId firstStepToSend = self->nextStepIdToSendToServer;
 
-    CLOG_C_VERBOSE(&self->clog, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", firstStepToSend,
+    CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", firstStepToSend,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
 
 #define COMMAND_DEBUG "ClientOut"
@@ -25,7 +25,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     uint64_t clientReceiveMask = nbsPendingStepsReceiveMask(&self->authoritativePendingStepsFromServer,
                                                             &expectedStepIdFromServer);
 
-    CLOG_C_VERBOSE(&self->clog, "client is telling the server that the client is waiting for stepId %08X",
+    CLOG_C_VERBOSE(&self->log, "client is telling the server that the client is waiting for stepId %08X",
                    expectedStepIdFromServer)
 
     nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask);
@@ -40,7 +40,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
         return errorCode;
     }
 
-    CLOG_VERBOSE("outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
+    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
 
     nbsStepsDiscardUpTo(&self->outSteps, self->nextStepIdToSendToServer);
 

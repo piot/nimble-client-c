@@ -7,9 +7,9 @@
 #include <nimble-client/client.h>
 #include <nimble-client/debug.h>
 #include <nimble-client/outgoing.h>
+#include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
-#include <nimble-client/send_steps.h>
 #include <ordered-datagram/out_logic.h>
 
 #define DEBUG_PREFIX "Outgoing"

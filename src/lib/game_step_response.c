@@ -2,9 +2,9 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-#include <nimble-client/game_step_response.h>
-#include <nimble-client/client.h>
 #include <flood/in_stream.h>
+#include <nimble-client/client.h>
+#include <nimble-client/game_step_response.h>
 #include <nimble-steps-serialize/pending_in_serialize.h>
 
 /// Handle game step response (`NimbleSerializeCmdGameStepResponse`) from server.
@@ -37,21 +37,21 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
         self->receivedStepIdByServerOnlyForDebug = receivedStepIdFromRemote;
     }
 
-    CLOG_VERBOSE("nimbleClient: gameStep: received from server %08X", receivedStepIdFromRemote)
+    CLOG_C_VERBOSE(&self->log, "gameStep: received from server %08X", receivedStepIdFromRemote)
 
     int stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {
-        CLOG_SOFT_ERROR("GameStepResponse: nbsPendingStepsInSerialize() failed %d", stepCount)
+        CLOG_C_SOFT_ERROR(&self->log, "GameStepResponse: nbsPendingStepsInSerialize() failed %d", stepCount)
         return stepCount;
     }
 
     int copyResult = nbsPendingStepsCopy(&self->authoritativeStepsFromServer,
                                          &self->authoritativePendingStepsFromServer);
     if (copyResult < 0) {
-        CLOG_ERROR("nbsPendingStepsCopy failed: %d", copyResult)
+        CLOG_C_ERROR(&self->log, "nbsPendingStepsCopy failed: %d", copyResult)
     }
 
-    statsIntAdd(&self->waitingStepsFromServer, (int)self->authoritativeStepsFromServer.stepsCount);
+    statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
         //        CLOG_DEBUG("last added into")
@@ -61,8 +61,8 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
 
 #if 1
     nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server", 0);
-    CLOG_DEBUG("authoritative received steps count: %d (buffer size: %zu)", stepCount,
-               self->authoritativeStepsFromServer.stepsCount);
+    CLOG_C_DEBUG(&self->log, "authoritative received steps count: %d (buffer size: %zu)", stepCount,
+                 self->authoritativeStepsFromServer.stepsCount);
 #endif
 
     return stepCount;

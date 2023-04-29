@@ -2,9 +2,9 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-#include <nimble-client/download_state_response.h>
-#include <nimble-client/client.h>
 #include <flood/in_stream.h>
+#include <nimble-client/client.h>
+#include <nimble-client/download_state_response.h>
 #include <nimble-serialize/serialize.h>
 
 /// Handle incoming game state response (NimbleSerializeCmdGameStateResponse) from server.
@@ -50,4 +50,3 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     return 0;
 }
-

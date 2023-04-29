@@ -5,8 +5,6 @@
 #ifndef NIMBLE_CLIENT_H
 #define NIMBLE_CLIENT_H
 
-#include <ordered-datagram/out_logic.h>
-#include <ordered-datagram/in_logic.h>
 #include <blob-stream/blob_stream_logic_in.h>
 #include <blob-stream/blob_stream_logic_out.h>
 #include <clog/clog.h>
@@ -15,6 +13,8 @@
 #include <nimble-serialize/client_out.h>
 #include <nimble-steps/pending_steps.h>
 #include <nimble-steps/steps.h>
+#include <ordered-datagram/in_logic.h>
+#include <ordered-datagram/out_logic.h>
 #include <stats/stats.h>
 #include <stats/stats_per_second.h>
 #include <stdbool.h>
@@ -91,12 +91,15 @@ typedef struct NimbleClient {
     OrderedDatagramOutLogic orderedDatagramOut;
     OrderedDatagramInLogic orderedDatagramIn;
 
-    Clog clog;
+    size_t maximumSingleParticipantStepOctetCount;
+    size_t maximumNumberOfParticipants;
+    Clog log;
 
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
-                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport);
+                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
+                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants, Clog log);
 void nimbleClientReset(NimbleClient* self);
 void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport);
 void nimbleClientDestroy(NimbleClient* self);
