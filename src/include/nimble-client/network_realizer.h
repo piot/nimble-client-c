@@ -16,7 +16,7 @@ typedef enum NimbleClientRealizeState {
     NimbleClientRealizeStateInit,
     NimbleClientRealizeStateReInit,
     NimbleClientRealizeStateCleared,
-    NimbleClientRealizeStateInGame
+    NimbleClientRealizeStateSynced
 } NimbleClientRealizeState;
 
 typedef struct NimbleClientRealizeSettings {
@@ -25,6 +25,7 @@ typedef struct NimbleClientRealizeSettings {
     struct ImprintAllocatorWithFree* blobMemory;
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
+    NimbleSerializeVersion applicationVersion;
     Clog log;
 } NimbleClientRealizeSettings;
 

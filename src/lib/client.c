@@ -47,7 +47,7 @@ void nimbleClientReset(NimbleClient* self)
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
     self->joinedGameState.gameState = 0;
-
+    self->downloadStateClientRequestId = 33;
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
 }
@@ -85,14 +85,17 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
 
+    self->downloadStateClientRequestId = 33;
     self->joinedGameState.gameState = 0;
 }
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
-                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants, Clog log)
+                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
+                     NimbleSerializeVersion applicationVersion, Clog log)
 {
     self->log = log;
+    self->applicationVersion = applicationVersion;
 
     const size_t maximumSingleStepCountAllowed = 24;
     if (maximumSingleParticipantStepOctetCount > maximumSingleStepCountAllowed) {
@@ -203,8 +206,8 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
         return errorCode;
     }
 
-    self->waitTime--;
     if (self->waitTime > 0) {
+        self->waitTime--;
         return 0;
     }
 

@@ -10,15 +10,12 @@ static const char* stateToString(NimbleClientState state)
 {
     static const char* lookup[] = {
         "idle",
-        "joining game",
-        "joined game",
-        "playing the game",
-        "requesting start downloading state from server",
-        "downloading state from server",
-        "playing"
+        "requesting game state",
+        "downloading game state",
+        "synced",
     };
 
-    if (state < 0 || state >= sizeof(lookup)/sizeof(lookup[0])) {
+    if (state < 0 || state >= sizeof(lookup) / sizeof(lookup[0])) {
         CLOG_ERROR("unknown nimble client state: %02X", state)
     }
 

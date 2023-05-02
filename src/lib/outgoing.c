@@ -10,13 +10,13 @@
 #include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
-#include <ordered-datagram/out_logic.h>
 
 #define DEBUG_PREFIX "Outgoing"
 
 static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_INFO("join or rejoin game state being downloaded to client. Send ack to channel ")
+    CLOG_C_VERBOSE(&self->log, "game state ack to server on channel %04X. Game State is downloading to the client",
+                   self->joinStateChannel)
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateStatus, DEBUG_PREFIX);
     nimbleSerializeOutBlobStreamChannelId(stream, self->joinStateChannel);
@@ -34,6 +34,10 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
     CLOG_INFO("request downloading of state from server")
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
+    nimbleSerializeOutVersion(stream, &g_nimbleProtocolVersion);
+    nimbleSerializeOutVersion(stream, &self->applicationVersion);
+    fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
+
     self->waitTime = 0;
 
     return 0;
@@ -41,11 +45,22 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_INFO("send join game request");
+    CLOG_C_INFO(&self->log, "--------------------- send join participant request");
     nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
-    self->waitTime = 120;
+    self->waitTime = 64;
 
     return 0;
+}
+
+static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
+{
+    CLOG_C_VERBOSE(&self->log, "participant phase: %d", self->joinParticipantPhase)
+    switch (self->joinParticipantPhase) {
+        case NimbleJoiningStateJoiningParticipant:
+            return sendJoinGameRequest(self, outStream);
+        case NimbleJoiningStateJoinedParticipant:
+            return 0;
+    }
 }
 
 static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStream* outStream)
@@ -55,12 +70,10 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
             return sendStartDownloadStateRequest(self, outStream);
         case NimbleClientStateJoiningDownloadingState:
             return sendDownloadStateAck(self, outStream);
-        case NimbleClientStateJoiningGame:
-            return sendJoinGameRequest(self, outStream);
-        case NimbleClientStatePlaying:
         case NimbleClientStateIdle:
-        case NimbleClientStateJoinedGame:
             return 0;
+        case NimbleClientStateSynced:
+            return updateSyncedSubState(self, outStream);
         default:
             CLOG_ERROR("Unknown state %d", self->state)
     }
@@ -75,10 +88,14 @@ static TC_FORCE_INLINE int handleState(NimbleClient* self, UdpTransportOut* tran
         case NimbleClientStateIdle:
             return 0;
 
-        case NimbleClientStatePlaying:
-            return nimbleClientSendStepsToServer(self, transportOut);
-
         default: {
+            if (self->state == NimbleClientStateSynced) {
+                int sendStepsError = nimbleClientSendStepsToServer(self, transportOut);
+                if (sendStepsError < 0) {
+                    return sendStepsError;
+                }
+            }
+
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
             orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
@@ -102,7 +119,7 @@ static TC_FORCE_INLINE int handleState(NimbleClient* self, UdpTransportOut* tran
 /// @return negative on error.
 int nimbleClientOutgoing(NimbleClient* self, UdpTransportOut* transportOut)
 {
-    if (self->state != NimbleClientStatePlaying) {
+    if (self->state != NimbleClientStateSynced) {
         nimbleClientDebugOutput(self);
     }
 

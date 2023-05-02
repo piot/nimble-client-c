@@ -17,6 +17,9 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 {
     NimbleSerializeStateId stateId;
 
+    uint8_t clientRequestId;
+    fldInStreamReadUInt8(inStream, &clientRequestId);
+
     nimbleSerializeInStateId(inStream, &stateId);
 
     uint32_t octetCount;
@@ -29,6 +32,11 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
         return errorCode;
     }
 
+    if (clientRequestId != self->downloadStateClientRequestId) {
+        CLOG_SOFT_ERROR("got download game state reply for another request, ignoring")
+        return 0;
+    }
+
     if (channelId == self->joinStateChannel) {
         CLOG_SOFT_ERROR("already have this join state %u", self->joinStateChannel)
         return 0;
@@ -38,7 +46,8 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     CLOG_VERBOSE("rejoin answer: stateId: %04X octetCount:%u channel:%02X", stateId, octetCount, channelId)
 
-    blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE, self->log);
+    blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE,
+                     self->log);
     blobStreamLogicInInit(&self->blobStreamInLogic, &self->blobStreamIn);
 
     self->joinedGameState.stepId = stateId;

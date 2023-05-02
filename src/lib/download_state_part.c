@@ -2,10 +2,24 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-#include <nimble-client/download_state_part.h>
-#include <nimble-client/client.h>
 #include <flood/in_stream.h>
+#include <nimble-client/client.h>
+#include <nimble-client/download_state_part.h>
 #include <nimble-serialize/serialize.h>
+
+static void trySetInitialGameState(NimbleClient* self)
+{
+    if (self->state == NimbleClientStateSynced) {
+        CLOG_C_NOTICE(&self->log, "we are already synced, ignoring that state is ready")
+        return;
+    }
+    CLOG_C_INFO(&self->log, "=====================================================================")
+    CLOG_C_INFO(&self->log, "we have downloaded the game state %04X", self->joinedGameState.stepId)
+    self->state = NimbleClientStateSynced;
+    nimbleClientGameStateInit(&self->joinedGameState, self->blobStreamAllocator, self->joinStateId,
+                              self->blobStreamIn.blob, self->blobStreamIn.octetCount);
+    nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, self->joinedGameState.stepId);
+}
 
 /// Handle incoming message NimbleSerializeCmdGameStatePart
 /// Receives a blob stream chunk. If the blob stream is completed, it sets the game state to joinedGameState
@@ -31,10 +45,7 @@ int nimbleClientOnDownloadGameStatePart(NimbleClient* self, FldInStream* inStrea
     }
 
     if (blobStreamInIsComplete(&self->blobStreamIn)) {
-        CLOG_DEBUG("we have downloaded the join state")
-        self->state = NimbleClientStatePlaying;
-        nimbleClientGameStateInit(&self->joinedGameState, self->blobStreamAllocator, self->joinStateId,
-                                  self->blobStreamIn.blob, self->blobStreamIn.octetCount);
+        trySetInitialGameState(self);
     }
 
     return 0;

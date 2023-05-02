@@ -45,10 +45,10 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
         return participantCount;
     }
 
-    CLOG_INFO("join game response. Connection index %d participants: %d",
-              self->participantsConnectionIndex, participantCount)
+    CLOG_INFO("join game response. Connection index %d participants: %d", self->participantsConnectionIndex,
+              participantCount)
 
-    self->state = NimbleClientStateJoinedGame;
+    self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;
     self->joinStateChannel = 0;
 

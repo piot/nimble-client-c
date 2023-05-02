@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 
         frame++;
 
-        if ((frame % 2) == 0 && reportedState == NimbleClientRealizeStateInGame &&
+        if ((frame % 2) == 0 && reportedState == NimbleClientRealizeStateSynced &&
             nbsStepsAllowedToAdd(&clientRealize.client.outSteps)) {
             CLOG_VERBOSE("adding out step %016X", clientRealize.client.outSteps.expectedWriteId);
             NimbleStepsOutSerializeLocalParticipants data;
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
                 case NimbleClientRealizeStateInit:
                 case NimbleClientRealizeStateReInit:
                 case NimbleClientRealizeStateCleared:
-                case NimbleClientRealizeStateInGame:
+                case NimbleClientRealizeStateSynced:
                     break;
             }
         }

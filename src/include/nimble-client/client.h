@@ -29,12 +29,15 @@ struct FldOutStream;
 
 typedef enum NimbleClientState {
     NimbleClientStateIdle,
-    NimbleClientStateJoiningGame,
-    NimbleClientStateJoinedGame,
     NimbleClientStateJoiningRequestingState,
     NimbleClientStateJoiningDownloadingState,
-    NimbleClientStatePlaying,
+    NimbleClientStateSynced,
 } NimbleClientState;
+
+typedef enum NimbleJoiningState {
+    NimbleJoiningStateJoiningParticipant,
+    NimbleJoiningStateJoinedParticipant,
+} NimbleJoiningState;
 
 #define NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT (8)
 
@@ -49,6 +52,7 @@ typedef struct NimbleClient {
     int waitTime;
 
     NimbleClientState state;
+    NimbleJoiningState joinParticipantPhase;
 
     NimbleClientParticipantEntry localParticipantLookup[NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT];
     size_t localParticipantCount;
@@ -65,6 +69,7 @@ typedef struct NimbleClient {
 
     BlobStreamLogicIn blobStreamInLogic;
     BlobStreamIn blobStreamIn;
+    uint8_t downloadStateClientRequestId;
 
     StepId joinStateId;
 
@@ -93,13 +98,15 @@ typedef struct NimbleClient {
 
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
+    NimbleSerializeVersion applicationVersion;
     Clog log;
 
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
-                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants, Clog log);
+                     size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
+                     NimbleSerializeVersion applicationVersion, Clog log);
 void nimbleClientReset(NimbleClient* self);
 void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport);
 void nimbleClientDestroy(NimbleClient* self);

@@ -61,8 +61,8 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
 
 #if 1
     nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server", 0);
-    CLOG_C_DEBUG(&self->log, "authoritative received steps count: %d (buffer size: %zu)", stepCount,
-                 self->authoritativeStepsFromServer.stepsCount);
+    CLOG_C_VERBOSE(&self->log, "authoritative received steps count: %d (buffer size: %zu)", stepCount,
+                   self->authoritativeStepsFromServer.stepsCount);
 #endif
 
     return stepCount;

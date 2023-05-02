@@ -16,7 +16,7 @@ void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealiz
     self->settings = *settings;
     nimbleClientInit(&self->client, settings->memory, settings->blobMemory, &self->settings.transport,
                      settings->maximumSingleParticipantStepOctetCount, settings->maximumNumberOfParticipants,
-                     settings->log);
+                     settings->applicationVersion, settings->log);
 }
 
 void nimbleClientRealizeReInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings)
@@ -41,7 +41,8 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
 {
     self->client.joinGameOptions = options;
-    self->targetState = NimbleClientRealizeStateInGame;
+    self->targetState = NimbleClientRealizeStateSynced;
+    self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
 
 void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
@@ -76,16 +77,12 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, s
                 self->state = self->targetState;
             }
             break;
-        case NimbleClientRealizeStateInGame:
+        case NimbleClientRealizeStateSynced:
             if (self->client.state == NimbleClientStateIdle) {
-                self->client.state = NimbleClientStateJoiningGame;
-                self->client.waitTime = 0;
-            }
-            if (self->client.state == NimbleClientStateJoinedGame) {
                 self->client.state = NimbleClientStateJoiningRequestingState;
-            }
-            if (self->client.state == NimbleClientStatePlaying) {
-                self->state = self->targetState;
+                self->client.waitTime = 0;
+            } else if (self->client.state == NimbleClientStateSynced) {
+                self->state = NimbleClientRealizeStateSynced;
             }
         default:
             break;
