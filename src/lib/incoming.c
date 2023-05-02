@@ -35,18 +35,30 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
                       self->orderedDatagramIn.lastReceivedSequence)
     }
 
+    int result = -1;
     switch (cmd) {
         case NimbleSerializeCmdGameStatePart:
-            return nimbleClientOnDownloadGameStatePart(self, &inStream);
+            result = nimbleClientOnDownloadGameStatePart(self, &inStream);
+            break;
         case NimbleSerializeCmdGameStepResponse:
-            return nimbleClientOnGameStepResponse(self, &inStream);
+            result = nimbleClientOnGameStepResponse(self, &inStream);
+            break;
         case NimbleSerializeCmdJoinGameResponse:
-            return nimbleClientOnJoinGameResponse(self, &inStream);
+            result = nimbleClientOnJoinGameResponse(self, &inStream);
+            break;
         case NimbleSerializeCmdGameStateResponse:
-            return nimbleClientOnDownloadGameStateResponse(self, &inStream);
+            result = nimbleClientOnDownloadGameStateResponse(self, &inStream);
+            break;
         default:
             CLOG_ERROR("unknown message %02X", cmd)
             return -1;
     }
-    return 0;
+
+    if (result >= 0) {
+        if (inStream.pos != inStream.size) {
+            CLOG_C_ERROR(&self->log, "did not read all of it")
+        }
+    }
+
+    return result;
 }
