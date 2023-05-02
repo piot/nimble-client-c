@@ -33,12 +33,12 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
     }
 
     if (clientRequestId != self->downloadStateClientRequestId) {
-        CLOG_SOFT_ERROR("got download game state reply for another request, ignoring")
+        CLOG_C_NOTICE(&self->log, "got download game state reply for another request, ignoring")
         return 0;
     }
 
     if (channelId == self->joinStateChannel) {
-        CLOG_SOFT_ERROR("already have this join state %u", self->joinStateChannel)
+        CLOG_C_NOTICE(&self->log, "already have this join state %u", self->joinStateChannel)
         return 0;
     }
 
