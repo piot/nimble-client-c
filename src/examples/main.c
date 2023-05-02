@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
         size_t targetFps;
         nimbleClientRealizeUpdate(&clientRealize, now, &targetFps);
 
-        static uint8_t readPayload[512];
+        uint8_t readPayload[512];
 
         StepId readStepId;
         int payloadOctetCount = nimbleClientReadStep(&clientRealize.client, readPayload, 512, &readStepId);

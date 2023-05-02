@@ -79,10 +79,10 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
     }
 }
 
-static TC_FORCE_INLINE int handleState(NimbleClient* self, UdpTransportOut* transportOut)
+static int handleState(NimbleClient* self, UdpTransportOut* transportOut)
 {
 #define UDP_MAX_SIZE (1200)
-    static uint8_t buf[UDP_MAX_SIZE];
+    uint8_t buf[UDP_MAX_SIZE];
 
     switch (self->state) {
         case NimbleClientStateIdle:

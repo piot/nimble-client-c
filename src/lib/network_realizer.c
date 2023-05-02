@@ -38,6 +38,10 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
     self->state = NimbleClientRealizeStateCleared;
 }
 
+/// Starts the joining of participants
+/// Sends join request to the server and hopefully gets back a join result with the participant IDs.
+/// @param self
+/// @param options
 void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
 {
     self->client.joinGameOptions = options;

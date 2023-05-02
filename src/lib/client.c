@@ -2,10 +2,10 @@
  *  Copyright (c) Peter Bjorklund. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-#include "nimble-client/receive_transport.h"
 #include <monotonic-time/monotonic_time.h>
 #include <nimble-client/client.h>
 #include <nimble-client/outgoing.h>
+#include <nimble-client/receive_transport.h>
 #include <nimble-steps-serialize/out_serialize.h>
 
 void nimbleClientReset(NimbleClient* self)
@@ -36,7 +36,7 @@ void nimbleClientReset(NimbleClient* self)
     statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
 
-    self->useStats = 1;
+    self->useStats = true;
     self->transport.self = 0;
     self->transport.send = 0;
     self->transport.receive = 0;
@@ -77,7 +77,7 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
     statsIntPerSecondInit(&self->packetsPerSecondOut, now, 1000);
     statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
-    self->useStats = 1;
+    self->useStats = true;
     self->transport = *transport;
     self->nextStepIdToSendToServer = NIMBLE_STEP_MAX;
     self->state = NimbleClientStateIdle;

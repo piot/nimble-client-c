@@ -31,9 +31,6 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
     uint32_t receivedStepIdFromRemote;
     fldInStreamReadUInt32(inStream, &receivedStepIdFromRemote);
     if (receivedStepIdFromRemote != self->receivedStepIdByServerOnlyForDebug) {
-#if 1
-        // CLOG_DEBUG("stepId received by server: %08X", receivedStepIdFromRemote);
-#endif
         self->receivedStepIdByServerOnlyForDebug = receivedStepIdFromRemote;
     }
 
@@ -49,13 +46,12 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
                                          &self->authoritativePendingStepsFromServer);
     if (copyResult < 0) {
         CLOG_C_ERROR(&self->log, "nbsPendingStepsCopy failed: %d", copyResult)
+        return copyResult;
     }
 
     statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
-        //        CLOG_DEBUG("last added into")
-        // nbsStepsDiscardIncluding(&self->outSteps, lastAddedId);
         statsIntPerSecondAdd(&self->simulationStepsPerSecond, stepCount);
     }
 
