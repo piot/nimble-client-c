@@ -19,6 +19,10 @@ static void trySetInitialGameState(NimbleClient* self)
     nimbleClientGameStateInit(&self->joinedGameState, self->blobStreamAllocator, self->joinStateId,
                               self->blobStreamIn.blob, self->blobStreamIn.octetCount);
     nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, self->joinedGameState.stepId);
+    nbsStepsReInit(&self->authoritativeStepsFromServer, self->joinedGameState.stepId);
+    // we should start predicting from this stepId as well
+    nbsStepsReInit(&self->outSteps, self->joinedGameState.stepId);
+
 }
 
 /// Handle incoming message NimbleSerializeCmdGameStatePart
