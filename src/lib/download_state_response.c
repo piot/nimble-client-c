@@ -52,8 +52,7 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     self->joinedGameState.stepId = stateId;
     self->joinStateId = stateId;
-    self->nextStepIdToSendToServer = stateId;
-
+    nbsStepsReInit(&self->outSteps, stateId);
     self->state = NimbleClientStateJoiningDownloadingState;
     self->waitTime = 0;
 

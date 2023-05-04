@@ -13,9 +13,7 @@
 
 static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
-    StepId firstStepToSend = self->nextStepIdToSendToServer;
-
-    CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", firstStepToSend,
+    CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
 
 #define COMMAND_DEBUG "ClientOut"
@@ -30,19 +28,19 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 
     nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask);
 
-    int stepsActuallySent = nbsStepsOutSerialize(stream, firstStepToSend, &self->outSteps);
+    int stepsActuallySent = nbsStepsOutSerialize(stream, &self->outSteps);
     if (stepsActuallySent < 0) {
         CLOG_SOFT_ERROR("problem with steps out serialize")
         return stepsActuallySent;
     }
+    /*
     int errorCode = nbsStepsOutSerializeAdvanceIfNeeded(&self->nextStepIdToSendToServer, &self->outSteps);
     if (errorCode < 0) {
         return errorCode;
-    }
+    }*/
 
-    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
+//    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
 
-    nbsStepsDiscardUpTo(&self->outSteps, self->nextStepIdToSendToServer);
 
     int stepsInBuffer = (int) self->outSteps.stepsCount - NimbleSerializeMaxRedundancyCount;
     if (stepsInBuffer < 0) {
@@ -66,5 +64,6 @@ int nimbleClientSendStepsToServer(NimbleClient* self, UdpTransportOut* transport
     orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
     sendStepsToStream(self, &outStream);
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
+    CLOG_C_VERBOSE(&self->log, "send steps to server %d", outStream.pos)
     return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
 }

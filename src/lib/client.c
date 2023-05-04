@@ -28,6 +28,8 @@ void nimbleClientReset(NimbleClient* self)
     statsIntInit(&self->waitingStepsFromServer, 30);
     statsIntInit(&self->outgoingStepsInQueue, 60);
     statsIntInit(&self->stepCountInIncomingBufferOnServerStat, 30);
+    statsIntInit(&self->tickDuration, 20);
+    self->lastUpdateMonotonicMsIsSet = false;
 
     MonotonicTimeMs now = monotonicTimeMsNow();
 
@@ -37,10 +39,6 @@ void nimbleClientReset(NimbleClient* self)
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
 
     self->useStats = true;
-    self->transport.self = 0;
-    self->transport.send = 0;
-    self->transport.receive = 0;
-    self->nextStepIdToSendToServer = NIMBLE_STEP_MAX;
     self->state = NimbleClientStateIdle;
 
     if (self->joinedGameState.gameState != 0) {
@@ -54,6 +52,9 @@ void nimbleClientReset(NimbleClient* self)
 
 void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 {
+    self->transport = *transport;
+    nimbleClientReset(self);
+/*
     nbsStepsReInit(&self->outSteps, 0);
     nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, 0);
     size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(
@@ -78,8 +79,7 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
     statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
     self->useStats = true;
-    self->transport = *transport;
-    self->nextStepIdToSendToServer = NIMBLE_STEP_MAX;
+
     self->state = NimbleClientStateIdle;
     if (self->joinedGameState.gameState != 0) {
         nimbleClientGameStateDestroy(&self->joinedGameState);
@@ -87,8 +87,11 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 
     self->downloadStateClientRequestId = 33;
     self->joinedGameState.gameState = 0;
+    */
 }
 
+
+///
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
@@ -112,12 +115,11 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     }
 
     self->memory = memory;
+    self->expectedTickDurationMs = 16;
     self->blobStreamAllocator = blobAllocator;
     self->joinedGameState.gameState = 0;
     self->maximumSingleParticipantStepOctetCount = maximumSingleParticipantStepOctetCount;
     self->maximumNumberOfParticipants = maximumNumberOfParticipants;
-
-    nimbleClientReset(self);
 
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
@@ -128,6 +130,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     nbsStepsInit(&self->outSteps, memory, combinedStepOctetCount, log);
     nbsPendingStepsInit(&self->authoritativePendingStepsFromServer, 0, blobAllocator, log);
     nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, log);
+
+    nimbleClientReInit(self, transport);
 
     return 0;
 }
@@ -200,6 +204,23 @@ int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDev
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
     int errorCode;
+
+    if (self->lastUpdateMonotonicMsIsSet) {
+        int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
+        if (encounteredTickDuration + 10 < self->expectedTickDurationMs) {
+            CLOG_C_NOTICE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
+            return 0;
+        }
+        statsIntAdd(&self->tickDuration, encounteredTickDuration);
+        if (self->tickDuration.avgIsSet) {
+            if (abs((int)self->expectedTickDurationMs - self->tickDuration.avg ) > 10) {
+                CLOG_C_NOTICE(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs, self->tickDuration.avg)
+            }
+        }
+    } else {
+        self->lastUpdateMonotonicMsIsSet = true;
+    }
+    self->lastUpdateMonotonicMs = now;
 
     errorCode = nimbleClientReceiveAllInUdpBuffer(self);
     if (errorCode < 0) {

@@ -34,6 +34,8 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
         self->receivedStepIdByServerOnlyForDebug = receivedStepIdFromRemote;
     }
 
+    nbsStepsDiscardUpTo(&self->outSteps, receivedStepIdFromRemote+1);
+
     CLOG_C_VERBOSE(&self->log, "gameStep: received from server %08X", receivedStepIdFromRemote)
 
     int stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);

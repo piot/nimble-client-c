@@ -63,7 +63,6 @@ typedef struct NimbleClient {
     NbsPendingSteps authoritativePendingStepsFromServer;
     NbsSteps authoritativeStepsFromServer;
     StepId receivedStepIdByServerOnlyForDebug;
-    StepId nextStepIdToSendToServer;
     NimbleClientGameState joinedGameState;
     NimbleSerializeBlobStreamChannelId joinStateChannel;
 
@@ -100,6 +99,11 @@ typedef struct NimbleClient {
     size_t maximumNumberOfParticipants;
     NimbleSerializeVersion applicationVersion;
     Clog log;
+
+    bool lastUpdateMonotonicMsIsSet;
+    MonotonicTimeMs lastUpdateMonotonicMs;
+    size_t expectedTickDurationMs;
+    StatsInt tickDuration;
 
 } NimbleClient;
 
