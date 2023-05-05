@@ -153,7 +153,7 @@ void nimbleClientDisconnect(NimbleClient* self)
 static void showStats(NimbleClient* self)
 {
     self->statsCounter++;
-    int shouldPrint = (self->statsCounter % 60) == 0; // self->waitingStepsFromServer.count == 0;
+    int shouldPrint = (self->statsCounter % 3000) == 0;
     if (!shouldPrint) {
         return;
     }
