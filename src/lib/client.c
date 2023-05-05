@@ -56,40 +56,6 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 {
     self->transport = *transport;
     nimbleClientReset(self);
-/*
-    nbsStepsReInit(&self->outSteps, 0);
-    nbsPendingStepsReset(&self->authoritativePendingStepsFromServer, 0);
-    size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(
-        self->maximumNumberOfParticipants, self->maximumSingleParticipantStepOctetCount);
-    nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, self->log);
-
-    self->receivedStepIdByServerOnlyForDebug = NIMBLE_STEP_MAX;
-
-    self->localParticipantCount = 0;
-    for (size_t i = 0; i < NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT; ++i) {
-        self->localParticipantLookup[i].participantId = 0;
-        self->localParticipantLookup[i].localUserDeviceIndex = 0;
-    }
-    statsIntInit(&self->authoritativeBufferDeltaStat, 10);
-    statsIntInit(&self->waitingStepsFromServer, 60);
-    statsIntInit(&self->outgoingStepsInQueue, 60);
-    statsIntInit(&self->stepCountInIncomingBufferOnServerStat, 10);
-
-    MonotonicTimeMs now = monotonicTimeMsNow();
-
-    statsIntPerSecondInit(&self->packetsPerSecondOut, now, 1000);
-    statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
-    statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
-    self->useStats = true;
-
-    self->state = NimbleClientStateIdle;
-    if (self->joinedGameState.gameState != 0) {
-        nimbleClientGameStateDestroy(&self->joinedGameState);
-    }
-
-    self->downloadStateClientRequestId = 33;
-    self->joinedGameState.gameState = 0;
-    */
 }
 
 
@@ -140,7 +106,6 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
 
 void nimbleClientDestroy(NimbleClient* self)
 {
-    nbsStepsDestroy(&self->outSteps);
     if (self->joinedGameState.gameState != 0) {
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
