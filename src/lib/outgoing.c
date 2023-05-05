@@ -107,6 +107,7 @@ static int handleState(NimbleClient* self, UdpTransportOut* transportOut)
                 return 0;
             }
             orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
+            statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
             return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
         }
     }

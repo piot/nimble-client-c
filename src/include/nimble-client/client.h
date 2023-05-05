@@ -85,6 +85,7 @@ typedef struct NimbleClient {
     StatsIntPerSecond packetsPerSecondOut;
     StatsIntPerSecond packetsPerSecondIn;
     StatsIntPerSecond simulationStepsPerSecond;
+    StatsIntPerSecond sentStepsDatagramCountPerSecond;
 
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobStreamAllocator;

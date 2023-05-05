@@ -38,6 +38,7 @@ void nimbleClientReset(NimbleClient* self)
     statsIntPerSecondInit(&self->packetsPerSecondOut, now, 1000);
     statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
+    statsIntPerSecondInit(&self->sentStepsDatagramCountPerSecond, now, 1000);
 
     self->useStats = true;
     self->state = NimbleClientStateIdle;
@@ -152,7 +153,7 @@ void nimbleClientDisconnect(NimbleClient* self)
 static void showStats(NimbleClient* self)
 {
     self->statsCounter++;
-    int shouldPrint = (self->statsCounter % 601) == 0; // self->waitingStepsFromServer.count == 0;
+    int shouldPrint = (self->statsCounter % 60) == 0; // self->waitingStepsFromServer.count == 0;
     if (!shouldPrint) {
         return;
     }
@@ -165,6 +166,7 @@ static void showStats(NimbleClient* self)
     statsIntPerSecondDebugOutput(&self->packetsPerSecondOut, "PPS Out", "packets/s");
     statsIntPerSecondDebugOutput(&self->packetsPerSecondIn, "PPS In", "packets/s");
     statsIntPerSecondDebugOutput(&self->simulationStepsPerSecond, "SIM In", "steps/s");
+    statsIntPerSecondDebugOutput(&self->sentStepsDatagramCountPerSecond, "SSD out", "steps/s");
 }
 
 static void calcStats(NimbleClient* self, MonotonicTimeMs now)
@@ -172,6 +174,7 @@ static void calcStats(NimbleClient* self, MonotonicTimeMs now)
     statsIntPerSecondUpdate(&self->packetsPerSecondOut, now);
     statsIntPerSecondUpdate(&self->packetsPerSecondIn, now);
     statsIntPerSecondUpdate(&self->simulationStepsPerSecond, now);
+    statsIntPerSecondUpdate(&self->sentStepsDatagramCountPerSecond, now);
 }
 
 static int sendPackets(NimbleClient* self)
@@ -209,13 +212,13 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     if (self->lastUpdateMonotonicMsIsSet) {
         int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < self->expectedTickDurationMs) {
-            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
+            CLOG_C_INFO(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
             return 0;
         }
         statsIntAdd(&self->tickDuration, encounteredTickDuration);
         if (self->tickDuration.avgIsSet) {
             if (abs((int)self->expectedTickDurationMs - self->tickDuration.avg ) > 10) {
-                CLOG_C_NOTICE(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs, self->tickDuration.avg)
+                CLOG_C_INFO(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs, self->tickDuration.avg)
             }
         }
     } else {

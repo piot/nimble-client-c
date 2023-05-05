@@ -11,4 +11,3 @@ struct FldInStream;
 int nimbleClientOnJoinGameResponse(struct NimbleClient* self, struct FldInStream* inStream);
 
 #endif
-
