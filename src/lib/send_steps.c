@@ -10,6 +10,7 @@
 #include <nimble-serialize/serialize.h>
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
+#include <monotonic-time/lower_bits.h>
 
 static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
@@ -26,7 +27,12 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     CLOG_C_VERBOSE(&self->log, "client is telling the server that the client is waiting for stepId %08X",
                    expectedStepIdFromServer)
 
-    nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask);
+    MonotonicTimeLowerBitsMs lowerBitsMs = monotonicTimeMsToLowerBits(monotonicTimeMsNow());
+
+    int serializeOutErr = nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask, lowerBitsMs);
+    if (serializeOutErr < 0) {
+        return serializeOutErr;
+    }
 
     int stepsActuallySent = nbsStepsOutSerialize(stream, &self->outSteps);
     if (stepsActuallySent < 0) {

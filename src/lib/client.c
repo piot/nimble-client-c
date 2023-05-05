@@ -29,6 +29,7 @@ void nimbleClientReset(NimbleClient* self)
     statsIntInit(&self->outgoingStepsInQueue, 60);
     statsIntInit(&self->stepCountInIncomingBufferOnServerStat, 30);
     statsIntInit(&self->tickDuration, 20);
+    statsIntInit(&self->latencyMsStat, 20);
     self->lastUpdateMonotonicMsIsSet = false;
 
     MonotonicTimeMs now = monotonicTimeMsNow();

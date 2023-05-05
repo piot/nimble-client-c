@@ -79,6 +79,7 @@ typedef struct NimbleClient {
     StatsInt waitingStepsFromServer;
     StatsInt stepCountInIncomingBufferOnServerStat;
     StatsInt authoritativeBufferDeltaStat;
+    StatsInt latencyMsStat;
     StatsInt outgoingStepsInQueue;
 
     StatsIntPerSecond packetsPerSecondOut;
@@ -104,6 +105,8 @@ typedef struct NimbleClient {
     MonotonicTimeMs lastUpdateMonotonicMs;
     size_t expectedTickDurationMs;
     StatsInt tickDuration;
+
+    int latencyMs;
 
 } NimbleClient;
 

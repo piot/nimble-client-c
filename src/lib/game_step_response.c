@@ -6,6 +6,7 @@
 #include <nimble-client/client.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-steps-serialize/pending_in_serialize.h>
+#include <monotonic-time/lower_bits.h>
 
 /// Handle game step response (`NimbleSerializeCmdGameStepResponse`) from server.
 /// Stream contains authoritative Steps from the server.
@@ -26,6 +27,16 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
 
     if (self->useStats) {
         statsIntAdd(&self->authoritativeBufferDeltaStat, deltaAgainstServerAuthoritativeBuffer);
+    }
+
+    MonotonicTimeLowerBitsMs monotonicTimeShortMs;
+    fldInStreamReadUInt16(inStream, &monotonicTimeShortMs);
+    MonotonicTimeMs now = monotonicTimeMsNow();
+    MonotonicTimeMs sentAt = monotonicTimeMsFromLowerBits(now, monotonicTimeShortMs);
+    self->latencyMs = now - sentAt;
+
+    if (self->useStats) {
+        statsIntAdd(&self->latencyMsStat, self->latencyMs);
     }
 
     uint32_t receivedStepIdFromRemote;
