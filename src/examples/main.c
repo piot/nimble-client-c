@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
             if (participantId == 0) {
                 CLOG_ERROR("illegal participant id")
             }
-            data.participants[0].participantIndex = participantId;
+            data.participants[0].participantId = participantId;
             data.participants[0].payload = (const uint8_t*) stepString;
             data.participants[0].payloadCount = strlen(stepString) + 1;
             data.participantCount = 1;
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
             CLOG_DEBUG("read step %016X  octetCount: %d", readStepId, payloadOctetCount);
             for (size_t i = 0; i < participants.participantCount; ++i) {
                 NimbleStepsOutSerializeLocalParticipant* participant = &participants.participants[i];
-                CLOG_DEBUG(" participant %d '%s' octetCount: %zu", participant->participantIndex, participant->payload,
+                CLOG_DEBUG(" participant %d '%s' octetCount: %zu", participant->participantId, participant->payload,
                            participant->payloadCount);
             }
         }
