@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
         if (payloadOctetCount > 0) {
             struct NimbleStepsOutSerializeLocalParticipants participants;
 
-            nbsStepsInSerializeAuthoritativeStepHelper(&participants, readPayload, payloadOctetCount);
+            nbsStepsInSerializeStepsForParticipantsFromOctets(&participants, readPayload, payloadOctetCount);
             CLOG_DEBUG("read step %016X  octetCount: %d", readStepId, payloadOctetCount);
             for (size_t i = 0; i < participants.participantCount; ++i) {
                 NimbleStepsOutSerializeLocalParticipant* participant = &participants.participants[i];
