@@ -118,8 +118,7 @@ int main(int argc, char* argv[])
         }
 
         MonotonicTimeMs now = monotonicTimeMsNow();
-        size_t targetFps;
-        nimbleClientRealizeUpdate(&clientRealize, now, &targetFps);
+        nimbleClientRealizeUpdate(&clientRealize, now);
 
         uint8_t readPayload[512];
 
