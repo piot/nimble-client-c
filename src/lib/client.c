@@ -8,6 +8,8 @@
 #include <nimble-client/receive_transport.h>
 #include <nimble-steps-serialize/out_serialize.h>
 
+/// Resets the nimble client so it can be reused for the same transport
+/// @param self
 void nimbleClientReset(NimbleClient* self)
 {
     nbsStepsReset(&self->outSteps);
@@ -52,6 +54,10 @@ void nimbleClientReset(NimbleClient* self)
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
 }
 
+
+/// Re-initializes the nimble client to be using another transport (connection)
+/// @param self
+/// @param transport
 void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 {
     self->transport = *transport;
@@ -59,7 +65,16 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 }
 
 
-///
+/// Initializes a nimble client
+/// @param self
+/// @param memory
+/// @param blobAllocator
+/// @param transport
+/// @param maximumSingleParticipantStepOctetCount
+/// @param maximumNumberOfParticipants
+/// @param applicationVersion
+/// @param log
+/// @return
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
@@ -104,6 +119,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     return 0;
 }
 
+/// Destroys a nimble client and frees the allocated memory
+/// @param self
 void nimbleClientDestroy(NimbleClient* self)
 {
     if (self->joinedGameState.gameState != 0) {
@@ -111,6 +128,9 @@ void nimbleClientDestroy(NimbleClient* self)
     }
 }
 
+/// Disconnects the client
+/// @note not implemented yet
+/// @param self
 void nimbleClientDisconnect(NimbleClient* self)
 {
 }
@@ -156,6 +176,11 @@ static int sendPackets(NimbleClient* self)
     return 0;
 }
 
+/// Looks up the participant id for the specified local user device index
+/// @param self
+/// @param localUserDeviceIndex
+/// @param participantId
+/// @return 1 on success or negative on error
 int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDeviceIndex, uint8_t* participantId)
 {
     for (size_t i = 0; i < self->localParticipantCount; ++i) {
@@ -170,6 +195,10 @@ int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDev
     return -1;
 }
 
+/// Updates the nimble client
+/// @param self
+/// @param now
+/// @return
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
     int errorCode;

@@ -56,6 +56,10 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     return 0;
 }
 
+/// Sends predicted steps to the server using the unreliable datagram transport
+/// @param self
+/// @param transportOut
+/// @return negative on error
 int nimbleClientSendStepsToServer(NimbleClient* self, UdpTransportOut* transportOut)
 {
 #define UDP_MAX_SIZE (1200)

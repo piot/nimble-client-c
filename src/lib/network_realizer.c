@@ -59,16 +59,10 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 /// It tries to go from the current state to the targetState
 /// @param self
 /// @param now
-/// @param targetFps the recommended tick-rate given the conditions
-void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, size_t* targetFps)
+void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
 {
     if (self->state != NimbleClientRealizeStateCleared && self->targetState != NimbleClientRealizeStateInit) {
         nimbleClientUpdate(&self->client, now);
-    }
-
-    *targetFps = 60;
-    if (self->client.authoritativeStepsFromServer.stepsCount > 2) {
-        *targetFps = 70;
     }
 
     if (self->targetState == self->state) {
@@ -88,6 +82,7 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, s
             } else if (self->client.state == NimbleClientStateSynced) {
                 self->state = NimbleClientRealizeStateSynced;
             }
+            break;
         default:
             break;
     }

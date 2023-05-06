@@ -22,6 +22,9 @@ static const char* stateToString(NimbleClientState state)
     return lookup[state];
 }
 
+/// Outputs the current state of the client to logging
+/// Only for debug purposes.
+/// @param self
 void nimbleClientDebugOutput(const NimbleClient* self)
 {
     CLOG_INFO("nimbleClientState: %s", stateToString(self->state))

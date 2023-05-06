@@ -32,6 +32,11 @@ static int readAndCheckOrderedDatagram(OrderedDatagramInLogic* inLogic, FldInStr
     return idDelta;
 }
 
+/// Acts on the incoming octets received from the server
+/// @param self
+/// @param data
+/// @param len
+/// @return negative on error.
 int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 {
     FldInStream inStream;

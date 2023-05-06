@@ -42,6 +42,6 @@ void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJ
 void nimbleClientRealizeDestroy(NimbleClientRealize* self);
 void nimbleClientRealizeReset(NimbleClientRealize* self);
 void nimbleClientRealizeQuitGame(NimbleClientRealize* self);
-void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now, size_t* targetFps);
+void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now);
 
 #endif

@@ -7,9 +7,10 @@
 #include <nimble-client/receive_transport.h>
 #include <nimble-serialize/debug.h>
 
-/// Reads from the datagram transport and feeds to the nimble client.
+/// Reads from the unreliable datagram transport and feeds to the nimble client.
+/// Feeds it to nimbleClientFeed().
 /// @param self
-/// @return
+/// @return the number of datagrams received, or negative on error
 int nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
 {
 #define UDP_MAX_RECEIVE_BUF_SIZE (1200)
