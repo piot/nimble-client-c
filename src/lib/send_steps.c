@@ -39,13 +39,8 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
         CLOG_SOFT_ERROR("problem with steps out serialize")
         return stepsActuallySent;
     }
-    /*
-    int errorCode = nbsStepsOutSerializeAdvanceIfNeeded(&self->nextStepIdToSendToServer, &self->outSteps);
-    if (errorCode < 0) {
-        return errorCode;
-    }*/
 
-//    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
+    //    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
 
 
     int stepsInBuffer = (int) self->outSteps.stepsCount - NimbleSerializeMaxRedundancyCount;
