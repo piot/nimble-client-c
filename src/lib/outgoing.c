@@ -31,7 +31,7 @@ static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 
 static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_INFO("request downloading of state from server")
+    CLOG_C_INFO(&self->log, "request downloading of state from server")
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
     nimbleSerializeOutVersion(stream, &g_nimbleProtocolVersion);

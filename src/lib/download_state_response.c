@@ -38,13 +38,13 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
     }
 
     if (channelId == self->joinStateChannel) {
-        CLOG_C_NOTICE(&self->log, "already have this join state %u", self->joinStateChannel)
+        CLOG_C_VERBOSE(&self->log, "already have this join state %u", self->joinStateChannel)
         return 0;
     }
 
     self->joinStateChannel = channelId;
 
-    CLOG_VERBOSE("rejoin answer: stateId: %04X octetCount:%u channel:%02X", stateId, octetCount, channelId)
+    CLOG_C_VERBOSE(&self->log, "rejoin answer: stateId: %04X octetCount:%u channel:%02X", stateId, octetCount, channelId)
 
     blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE,
                      self->log);
@@ -52,6 +52,7 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     self->joinedGameState.stepId = stateId;
     self->joinStateId = stateId;
+    CLOG_C_DEBUG(&self->log, "start predicting from %08X", stateId);
     nbsStepsReInit(&self->outSteps, stateId);
     self->state = NimbleClientStateJoiningDownloadingState;
     self->waitTime = 0;

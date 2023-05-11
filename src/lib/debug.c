@@ -27,5 +27,5 @@ static const char* stateToString(NimbleClientState state)
 /// @param self
 void nimbleClientDebugOutput(const NimbleClient* self)
 {
-    CLOG_INFO("nimbleClientState: %s", stateToString(self->state))
+    CLOG_C_DEBUG(&self->log, "nimbleClientState: %s", stateToString(self->state))
 }
