@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 #include <flood/in_stream.h>
+#include <monotonic-time/lower_bits.h>
 #include <nimble-client/client.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-steps-serialize/pending_in_serialize.h>
-#include <monotonic-time/lower_bits.h>
 
 /// Handle game step response (`NimbleSerializeCmdGameStepResponse`) from server.
 /// Stream contains authoritative Steps from the server.
@@ -39,13 +39,16 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
         statsIntAdd(&self->latencyMsStat, self->latencyMs);
     }
 
+    LagometerPacket packet = {LagometerPacketStatusReceived, self->latencyMs, inStream->size};
+    lagometerAddPacket(&self->lagometer, packet);
+
     uint32_t receivedStepIdFromRemote;
     fldInStreamReadUInt32(inStream, &receivedStepIdFromRemote);
     if (receivedStepIdFromRemote != self->receivedStepIdByServerOnlyForDebug) {
         self->receivedStepIdByServerOnlyForDebug = receivedStepIdFromRemote;
     }
 
-    nbsStepsDiscardUpTo(&self->outSteps, receivedStepIdFromRemote+1);
+    nbsStepsDiscardUpTo(&self->outSteps, receivedStepIdFromRemote + 1);
 
     CLOG_C_VERBOSE(&self->log, "gameStep: received from server %08X", receivedStepIdFromRemote)
 

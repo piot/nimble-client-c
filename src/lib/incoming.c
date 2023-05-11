@@ -46,6 +46,12 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
     if (delta < 0) {
         return delta;
     }
+    if (delta > 1) {
+        LagometerPacket droppedPacket = {LagometerPacketStatusDropped, 0, 0};
+        for (int i = 0; i < delta - 1; ++i) {
+            lagometerAddPacket(&self->lagometer, droppedPacket);
+        }
+    }
 
     uint8_t cmd;
     fldInStreamReadUInt8(&inStream, &cmd);

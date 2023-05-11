@@ -53,4 +53,5 @@ target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/nimble-serialize
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/nimble-steps-serialize-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/udp-transport/src/include)
 target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/imprint/src/include)
+target_include_directories(nimble_client_lib PUBLIC ${DEPS}piot/lagometer-c/src/include)
 target_include_directories(nimble_client_lib PUBLIC ../include)

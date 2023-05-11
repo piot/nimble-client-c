@@ -21,6 +21,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <udp-transport/udp_transport.h>
+#include <lagometer/lagometer.h>
 
 struct ImprintAllocatorWithFree;
 struct ImprintAllocator;
@@ -108,6 +109,8 @@ typedef struct NimbleClient {
     StatsInt tickDuration;
 
     int latencyMs;
+
+    Lagometer lagometer;
 
 } NimbleClient;
 

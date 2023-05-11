@@ -52,6 +52,7 @@ void nimbleClientReset(NimbleClient* self)
     self->downloadStateClientRequestId = 33;
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
+    lagometerInit(&self->lagometer);
 }
 
 

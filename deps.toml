@@ -27,9 +27,12 @@ version = "*"
 name = 'piot/blob-stream'
 version = "*"
 
-
 [[dependencies]]
 name = 'piot/ordered-datagram-c'
+version = "*"
+
+[[dependencies]]
+name = 'piot/lagometer-c'
 version = "*"
 
 [[development]]
