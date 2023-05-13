@@ -207,7 +207,7 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     if (self->lastUpdateMonotonicMsIsSet) {
         int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < self->expectedTickDurationMs) {
-            CLOG_C_INFO(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
+            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
             return 0;
         }
         statsIntAdd(&self->tickDuration, encounteredTickDuration);
