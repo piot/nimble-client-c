@@ -8,6 +8,8 @@
 #include <blob-stream/blob_stream_logic_in.h>
 #include <blob-stream/blob_stream_logic_out.h>
 #include <clog/clog.h>
+#include <datagram-transport/transport.h>
+#include <lagometer/lagometer.h>
 #include <nimble-client/game_state.h>
 #include <nimble-client/incoming_api.h>
 #include <nimble-serialize/client_out.h>
@@ -20,8 +22,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <udp-transport/udp_transport.h>
-#include <lagometer/lagometer.h>
 
 struct ImprintAllocatorWithFree;
 struct ImprintAllocator;
@@ -58,7 +58,7 @@ typedef struct NimbleClient {
     NimbleClientParticipantEntry localParticipantLookup[NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT];
     size_t localParticipantCount;
 
-    UdpTransportInOut transport;
+    DatagramTransport transport;
 
     NbsSteps outSteps;
     NbsPendingSteps authoritativePendingStepsFromServer;
@@ -115,11 +115,11 @@ typedef struct NimbleClient {
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
-                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
+                     struct ImprintAllocatorWithFree* blobAllocator, DatagramTransport* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
                      NimbleSerializeVersion applicationVersion, Clog log);
 void nimbleClientReset(NimbleClient* self);
-void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport);
+void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport);
 void nimbleClientDestroy(NimbleClient* self);
 void nimbleClientDisconnect(NimbleClient* self);
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now);

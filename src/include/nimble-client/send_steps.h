@@ -6,8 +6,8 @@
 #define NIMBLE_CLIENT_OUTGOING_SEND_STEPS_H
 
 struct NimbleClient;
-struct UdpTransportOut;
+struct DatagramTransportOut;
 
-int nimbleClientSendStepsToServer(struct NimbleClient* self, struct UdpTransportOut* transportOut);
+int nimbleClientSendStepsToServer(struct NimbleClient* self, struct DatagramTransportOut* transportOut);
 
 #endif

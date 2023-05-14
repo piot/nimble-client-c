@@ -79,7 +79,7 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
     }
 }
 
-static int handleState(NimbleClient* self, UdpTransportOut* transportOut)
+static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 {
 #define UDP_MAX_SIZE (1200)
     uint8_t buf[UDP_MAX_SIZE];
@@ -118,7 +118,7 @@ static int handleState(NimbleClient* self, UdpTransportOut* transportOut)
 /// @param now
 /// @param transportOut
 /// @return negative on error.
-int nimbleClientOutgoing(NimbleClient* self, UdpTransportOut* transportOut)
+int nimbleClientOutgoing(NimbleClient* self, DatagramTransportOut* transportOut)
 {
     if (self->state != NimbleClientStateSynced) {
         nimbleClientDebugOutput(self);

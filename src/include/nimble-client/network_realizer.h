@@ -20,7 +20,7 @@ typedef enum NimbleClientRealizeState {
 } NimbleClientRealizeState;
 
 typedef struct NimbleClientRealizeSettings {
-    UdpTransportInOut transport;
+    DatagramTransport transport;
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobMemory;
     size_t maximumSingleParticipantStepOctetCount;

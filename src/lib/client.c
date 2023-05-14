@@ -59,7 +59,7 @@ void nimbleClientReset(NimbleClient* self)
 /// Re-initializes the nimble client to be using another transport (connection)
 /// @param self
 /// @param transport
-void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
+void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport)
 {
     self->transport = *transport;
     nimbleClientReset(self);
@@ -77,7 +77,7 @@ void nimbleClientReInit(NimbleClient* self, UdpTransportInOut* transport)
 /// @param log
 /// @return
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
-                     struct ImprintAllocatorWithFree* blobAllocator, UdpTransportInOut* transport,
+                     struct ImprintAllocatorWithFree* blobAllocator, DatagramTransport* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
                      NimbleSerializeVersion applicationVersion, Clog log)
 {
@@ -165,7 +165,7 @@ static void calcStats(NimbleClient* self, MonotonicTimeMs now)
 
 static int sendPackets(NimbleClient* self)
 {
-    UdpTransportOut transportOut;
+    DatagramTransportOut transportOut;
     transportOut.self = self->transport.self;
     transportOut.send = self->transport.send;
 

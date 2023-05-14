@@ -55,7 +55,7 @@ target_include_directories(nimble_client PRIVATE ${DEPS}piot/blob-stream/src/inc
 target_include_directories(nimble_client PRIVATE ${DEPS}piot/bit-array/src/include)
 target_include_directories(nimble_client PRIVATE ${DEPS}piot/nimble-serialize-c/src/include)
 target_include_directories(nimble_client PRIVATE ${DEPS}piot/nimble-steps-serialize-c/src/include)
-target_include_directories(nimble_client PRIVATE ${DEPS}piot/udp-transport/src/include)
+target_include_directories(nimble_client PRIVATE ${DEPS}piot/datagram-transport/src/include)
 target_include_directories(nimble_client PRIVATE ${DEPS}piot/imprint/src/include)
 
 target_include_directories(nimble_client PRIVATE ${DEPS}piot/udp-client-c/src/include)

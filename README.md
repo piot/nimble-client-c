@@ -17,7 +17,7 @@ The Nimble Client does not do any simulation, rollback, prediction or similar. C
 
 ```c
 typedef struct NimbleClientRealizeSettings {
-    UdpTransportInOut transport;
+    DatagramTransport transport;
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobMemory;
     size_t maximumSingleParticipantStepOctetCount;

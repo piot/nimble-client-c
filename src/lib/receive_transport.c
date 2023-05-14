@@ -17,7 +17,7 @@ int nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
     uint8_t receiveBuf[UDP_MAX_RECEIVE_BUF_SIZE];
     size_t count = 0;
     while (1) {
-        int octetCount = udpTransportReceive(&self->transport, receiveBuf, UDP_MAX_RECEIVE_BUF_SIZE);
+        int octetCount = datagramTransportReceive(&self->transport, receiveBuf, UDP_MAX_RECEIVE_BUF_SIZE);
         if (octetCount > 0) {
             if (self->useStats) {
                 statsIntPerSecondAdd(&self->packetsPerSecondIn, 1);

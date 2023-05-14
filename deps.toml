@@ -20,7 +20,7 @@ name = 'piot/stats-c'
 version = "*"
 
 [[dependencies]]
-name = 'piot/udp-transport'
+name = 'piot/datagram-transport-c'
 version = "*"
 
 [[dependencies]]

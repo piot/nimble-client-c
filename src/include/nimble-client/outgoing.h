@@ -6,8 +6,8 @@
 #define NIMBLE_CLIENT_OUTGOING_H
 
 struct NimbleClient;
-struct UdpTransportOut;
+struct DatagramTransportOut;
 
-int nimbleClientOutgoing(struct NimbleClient* self, struct UdpTransportOut* transportOut);
+int nimbleClientOutgoing(struct NimbleClient* self, struct DatagramTransportOut* transportOut);
 
 #endif

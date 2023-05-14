@@ -60,7 +60,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 /// @param self
 /// @param transportOut
 /// @return negative on error
-int nimbleClientSendStepsToServer(NimbleClient* self, UdpTransportOut* transportOut)
+int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* transportOut)
 {
 #define UDP_MAX_SIZE (1200)
     uint8_t buf[UDP_MAX_SIZE];
