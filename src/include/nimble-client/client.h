@@ -19,6 +19,7 @@
 #include <ordered-datagram/out_logic.h>
 #include <stats/stats.h>
 #include <stats/stats_per_second.h>
+#include <stats/hold_positive.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -111,6 +112,8 @@ typedef struct NimbleClient {
     int latencyMs;
 
     Lagometer lagometer;
+
+    StatsHoldPositive droppingDatagramWarning;
 
 } NimbleClient;
 

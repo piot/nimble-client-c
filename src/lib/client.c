@@ -55,7 +55,6 @@ void nimbleClientReset(NimbleClient* self)
     lagometerInit(&self->lagometer);
 }
 
-
 /// Re-initializes the nimble client to be using another transport (connection)
 /// @param self
 /// @param transport
@@ -64,7 +63,6 @@ void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport)
     self->transport = *transport;
     nimbleClientReset(self);
 }
-
 
 /// Initializes a nimble client
 /// @param self
@@ -107,6 +105,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
 
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
+
+    statsHoldPositiveInit(&self->droppingDatagramWarning, 70U);
 
     size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(maximumNumberOfParticipants,
                                                                               maximumSingleParticipantStepOctetCount);
@@ -212,8 +212,9 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
         }
         statsIntAdd(&self->tickDuration, encounteredTickDuration);
         if (self->tickDuration.avgIsSet) {
-            if (abs((int)self->expectedTickDurationMs - self->tickDuration.avg ) > 10) {
-                CLOG_C_INFO(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs, self->tickDuration.avg)
+            if (abs((int) self->expectedTickDurationMs - self->tickDuration.avg) > 10) {
+                CLOG_C_INFO(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs,
+                            self->tickDuration.avg)
             }
         }
     } else {
