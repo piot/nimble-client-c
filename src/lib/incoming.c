@@ -18,17 +18,9 @@ static int readAndCheckOrderedDatagram(OrderedDatagramInLogic* inLogic, FldInStr
     int idDelta = orderedDatagramInLogicReceive(inLogic, inStream);
 
     if (idDelta <= 0) {
-        if (idDelta == 0) {
-            CLOG_C_NOTICE(log, "packets received duplicate")
-        } else {
-            CLOG_C_NOTICE(log, "packets received out of order")
-        }
         return -91;
-    } else if (idDelta > 1) {
-        CLOG_C_NOTICE(log, "%d packet(s) were dropped, but accepting sequence %04X", idDelta,
-                      inLogic->lastReceivedSequence)
     }
-
+    
     return idDelta;
 }
 

@@ -25,7 +25,11 @@ int nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
 #if NIMBLE_CLIENT_LOG_VERBOSE
             nimbleSerializeDebugHex("received", receiveBuf, octetCount);
 #endif
-            nimbleClientFeed(self, receiveBuf, octetCount);
+            int err = nimbleClientFeed(self, receiveBuf, octetCount);
+            if (err < 0) {
+                return err;
+            }
+            self->ticksWithoutIncomingDatagrams = 0;
             count++;
         } else if (octetCount < 0) {
             CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %d", octetCount);

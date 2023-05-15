@@ -50,6 +50,7 @@ void nimbleClientReset(NimbleClient* self)
     }
     self->joinedGameState.gameState = 0;
     self->downloadStateClientRequestId = 33;
+    self->ticksWithoutIncomingDatagrams = 0;
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
     lagometerInit(&self->lagometer);
@@ -106,7 +107,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
 
-    statsHoldPositiveInit(&self->droppingDatagramWarning, 70U);
+    statsHoldPositiveInit(&self->droppingDatagramWarning, 20U);
+    statsHoldPositiveInit(&self->impendingDisconnectWarning, 20U);
 
     size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(maximumNumberOfParticipants,
                                                                               maximumSingleParticipantStepOctetCount);
@@ -222,10 +224,15 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     }
     self->lastUpdateMonotonicMs = now;
 
+    self->ticksWithoutIncomingDatagrams++;
+
     errorCode = nimbleClientReceiveAllInUdpBuffer(self);
     if (errorCode < 0) {
         return errorCode;
     }
+
+    bool impendingDisconnectWarning = self->ticksWithoutIncomingDatagrams > 10U;
+    statsHoldPositiveAdd(&self->impendingDisconnectWarning, impendingDisconnectWarning);
 
     if (self->waitTime > 0) {
         self->waitTime--;

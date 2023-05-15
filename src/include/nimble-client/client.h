@@ -114,6 +114,8 @@ typedef struct NimbleClient {
     Lagometer lagometer;
 
     StatsHoldPositive droppingDatagramWarning;
+    StatsHoldPositive impendingDisconnectWarning;
+    size_t ticksWithoutIncomingDatagrams;
 
 } NimbleClient;
 
