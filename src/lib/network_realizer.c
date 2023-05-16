@@ -61,6 +61,12 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 /// @param now
 void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
 {
+    if (self->client.state == NimbleClientStateDisconnected) {
+        // If underlying nimble client has given up, we need to follow the example
+        self->state = NimbleClientRealizeStateDisconnected;
+        return;
+    }
+
     if (self->state != NimbleClientRealizeStateCleared && self->targetState != NimbleClientRealizeStateInit) {
         nimbleClientUpdate(&self->client, now);
     }

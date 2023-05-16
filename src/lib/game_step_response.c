@@ -68,6 +68,7 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
     statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
+        self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
         statsIntPerSecondAdd(&self->simulationStepsPerSecond, stepCount);
     }
 

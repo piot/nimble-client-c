@@ -51,6 +51,7 @@ void nimbleClientReset(NimbleClient* self)
     self->joinedGameState.gameState = 0;
     self->downloadStateClientRequestId = 33;
     self->ticksWithoutIncomingDatagrams = 0;
+    self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
     lagometerInit(&self->lagometer);
@@ -136,6 +137,7 @@ void nimbleClientDestroy(NimbleClient* self)
 /// @param self
 void nimbleClientDisconnect(NimbleClient* self)
 {
+    self->state = NimbleClientStateDisconnected;
 }
 
 static void showStats(NimbleClient* self)
@@ -167,6 +169,10 @@ static void calcStats(NimbleClient* self, MonotonicTimeMs now)
 
 static int sendPackets(NimbleClient* self)
 {
+    if (self->state == NimbleClientStateIdle || self->state == NimbleClientStateDisconnected) {
+        return 0;
+    }
+
     DatagramTransportOut transportOut;
     transportOut.self = self->transport.self;
     transportOut.send = self->transport.send;
@@ -198,19 +204,38 @@ int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDev
     return -1;
 }
 
-/// Updates the nimble client
-/// @param self
-/// @param now
-/// @return
-int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
+static void checkIfDisconnectIsNeeded(NimbleClient* self)
 {
-    int errorCode;
+    if (self->state != NimbleClientStateSynced) {
+        return;
+    }
 
+    bool impendingDisconnectWarning = self->ticksWithoutIncomingDatagrams > 10U;
+    statsHoldPositiveAdd(&self->impendingDisconnectWarning, impendingDisconnectWarning);
+    if (self->ticksWithoutIncomingDatagrams > 20U) {
+        CLOG_C_NOTICE(&self->log, "no valid incoming datagrams for %zu ticks, disconnecting",
+                      self->ticksWithoutIncomingDatagrams)
+        self->state = NimbleClientStateDisconnected;
+    }
+
+    if (self->localParticipantCount > 0) {
+        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 8U) {
+            CLOG_C_NOTICE(&self->log, "no new authoritative steps for %zu ticks - disconnecting",
+                          self->ticksWithoutAuthoritativeStepsFromInSerialize)
+            self->state = NimbleClientStateDisconnected;
+        }
+
+        self->ticksWithoutAuthoritativeStepsFromInSerialize++;
+    }
+}
+
+static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
+{
     if (self->lastUpdateMonotonicMsIsSet) {
         int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < self->expectedTickDurationMs) {
             CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
-            return 0;
+            return;
         }
         statsIntAdd(&self->tickDuration, encounteredTickDuration);
         if (self->tickDuration.avgIsSet) {
@@ -223,29 +248,34 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
         self->lastUpdateMonotonicMsIsSet = true;
     }
     self->lastUpdateMonotonicMs = now;
+}
 
+/// Updates the nimble client
+/// @param self
+/// @param now
+/// @return
+int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
+{
+    checkTickInterval(self, now);
+
+    // Update all receive counters before receiving
     self->ticksWithoutIncomingDatagrams++;
 
-    errorCode = nimbleClientReceiveAllInUdpBuffer(self);
+    int errorCode = nimbleClientReceiveAllInUdpBuffer(self);
     if (errorCode < 0) {
         return errorCode;
     }
 
-    bool impendingDisconnectWarning = self->ticksWithoutIncomingDatagrams > 10U;
-    statsHoldPositiveAdd(&self->impendingDisconnectWarning, impendingDisconnectWarning);
+    checkIfDisconnectIsNeeded(self);
 
     if (self->waitTime > 0) {
         self->waitTime--;
         return 0;
     }
 
-    // CLOG_INFO("nimble client update ===========");
-
     calcStats(self, now);
     showStats(self);
     sendPackets(self);
-
-    // CLOG_INFO("------ nimble client");
 
     return errorCode;
 }

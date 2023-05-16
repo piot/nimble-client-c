@@ -16,7 +16,8 @@ typedef enum NimbleClientRealizeState {
     NimbleClientRealizeStateInit,
     NimbleClientRealizeStateReInit,
     NimbleClientRealizeStateCleared,
-    NimbleClientRealizeStateSynced
+    NimbleClientRealizeStateSynced,
+    NimbleClientRealizeStateDisconnected
 } NimbleClientRealizeState;
 
 typedef struct NimbleClientRealizeSettings {

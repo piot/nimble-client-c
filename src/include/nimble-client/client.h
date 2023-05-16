@@ -34,6 +34,7 @@ typedef enum NimbleClientState {
     NimbleClientStateJoiningRequestingState,
     NimbleClientStateJoiningDownloadingState,
     NimbleClientStateSynced,
+    NimbleClientStateDisconnected
 } NimbleClientState;
 
 typedef enum NimbleJoiningState {
@@ -116,7 +117,7 @@ typedef struct NimbleClient {
     StatsHoldPositive droppingDatagramWarning;
     StatsHoldPositive impendingDisconnectWarning;
     size_t ticksWithoutIncomingDatagrams;
-
+    size_t ticksWithoutAuthoritativeStepsFromInSerialize;
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,

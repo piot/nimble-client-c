@@ -87,6 +87,8 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
     switch (self->state) {
         case NimbleClientStateIdle:
             return 0;
+        case NimbleClientStateDisconnected:
+            return 0;
 
         default: {
             if (self->state == NimbleClientStateSynced) {
