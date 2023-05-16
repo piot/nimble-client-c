@@ -27,11 +27,11 @@ void nimbleClientReset(NimbleClient* self)
         self->localParticipantLookup[i].localUserDeviceIndex = 0;
     }
 
-    statsIntInit(&self->waitingStepsFromServer, 30);
-    statsIntInit(&self->outgoingStepsInQueue, 60);
-    statsIntInit(&self->stepCountInIncomingBufferOnServerStat, 30);
+    statsIntInit(&self->waitingStepsFromServer, 20);
+    statsIntInit(&self->outgoingStepsInQueue, 20);
+    statsIntInit(&self->stepCountInIncomingBufferOnServerStat, 20);
     statsIntInit(&self->tickDuration, 20);
-    statsIntInit(&self->latencyMsStat, 20);
+    statsIntInit(&self->latencyMsStat, 15);
     self->lastUpdateMonotonicMsIsSet = false;
 
     MonotonicTimeMs now = monotonicTimeMsNow();
@@ -148,15 +148,17 @@ static void showStats(NimbleClient* self)
         return;
     }
 
-    statsIntDebug(&self->waitingStepsFromServer, "waiting steps from server", "steps");
-    statsIntDebug(&self->stepCountInIncomingBufferOnServerStat, "incoming buffer count on server", "steps");
-    statsIntDebug(&self->authoritativeBufferDeltaStat, "delta from last authoritative step on server", "steps");
-    statsIntDebug(&self->outgoingStepsInQueue, "outgoing steps to send to server", "steps");
+    const Clog* log = &self->log;
 
-    statsIntPerSecondDebugOutput(&self->packetsPerSecondOut, "PPS Out", "packets/s");
-    statsIntPerSecondDebugOutput(&self->packetsPerSecondIn, "PPS In", "packets/s");
-    statsIntPerSecondDebugOutput(&self->simulationStepsPerSecond, "SIM In", "steps/s");
-    statsIntPerSecondDebugOutput(&self->sentStepsDatagramCountPerSecond, "SSD out", "steps/s");
+    statsIntDebug(&self->waitingStepsFromServer, log, "waiting steps from server", "steps");
+    statsIntDebug(&self->stepCountInIncomingBufferOnServerStat, log, "incoming buffer count on server", "steps");
+    statsIntDebug(&self->authoritativeBufferDeltaStat, log, "delta from last authoritative step on server", "steps");
+    statsIntDebug(&self->outgoingStepsInQueue, log, "outgoing steps to send to server", "steps");
+
+    statsIntPerSecondDebugOutput(&self->packetsPerSecondOut, log, "PPS Out", "packets/s");
+    statsIntPerSecondDebugOutput(&self->packetsPerSecondIn, log, "PPS In", "packets/s");
+    statsIntPerSecondDebugOutput(&self->simulationStepsPerSecond, log, "SIM In", "steps/s");
+    statsIntPerSecondDebugOutput(&self->sentStepsDatagramCountPerSecond, log, "SSD out", "steps/s");
 }
 
 static void calcStats(NimbleClient* self, MonotonicTimeMs now)
@@ -219,7 +221,7 @@ static void checkIfDisconnectIsNeeded(NimbleClient* self)
     }
 
     if (self->localParticipantCount > 0) {
-        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 8U) {
+        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 10U) {
             CLOG_C_NOTICE(&self->log, "no new authoritative steps for %zu ticks - disconnecting",
                           self->ticksWithoutAuthoritativeStepsFromInSerialize)
             self->state = NimbleClientStateDisconnected;
@@ -240,8 +242,8 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
         statsIntAdd(&self->tickDuration, encounteredTickDuration);
         if (self->tickDuration.avgIsSet) {
             if (abs((int) self->expectedTickDurationMs - self->tickDuration.avg) > 10) {
-                CLOG_C_INFO(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs,
-                            self->tickDuration.avg)
+                CLOG_C_VERBOSE(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs,
+                               self->tickDuration.avg)
             }
         }
     } else {
