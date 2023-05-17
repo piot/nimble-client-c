@@ -221,7 +221,7 @@ static void checkIfDisconnectIsNeeded(NimbleClient* self)
     }
 
     if (self->localParticipantCount > 0) {
-        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 10U) {
+        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 20U) {
             CLOG_C_NOTICE(&self->log, "no new authoritative steps for %zu ticks - disconnecting",
                           self->ticksWithoutAuthoritativeStepsFromInSerialize)
             self->state = NimbleClientStateDisconnected;
