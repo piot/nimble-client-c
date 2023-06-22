@@ -235,7 +235,7 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 {
     if (self->lastUpdateMonotonicMsIsSet) {
         int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
-        if (encounteredTickDuration + 10 < self->expectedTickDurationMs) {
+        if (encounteredTickDuration + 10 < (int)self->expectedTickDurationMs) {
             CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
             return;
         }

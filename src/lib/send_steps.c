@@ -69,7 +69,7 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
     sendStepsToStream(self, &outStream);
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
-    CLOG_C_VERBOSE(&self->log, "send steps to server %d", outStream.pos)
+    CLOG_C_VERBOSE(&self->log, "send steps to server %zu", outStream.pos)
     statsIntPerSecondAdd(&self->sentStepsDatagramCountPerSecond, 1);
     statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
     return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
