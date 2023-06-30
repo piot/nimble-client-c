@@ -7,6 +7,7 @@
 #include <nimble-client/outgoing.h>
 #include <nimble-client/receive_transport.h>
 #include <nimble-steps-serialize/out_serialize.h>
+#include <inttypes.h>
 
 /// Resets the nimble client so it can be reused for the same transport
 /// @param self nimble client
@@ -236,7 +237,7 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
     if (self->lastUpdateMonotonicMsIsSet) {
         MonotonicTimeMs encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < (int) self->expectedTickDurationMs) {
-            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %ld", encounteredTickDuration)
+            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %" PRIi64, encounteredTickDuration)
             return;
         }
         statsIntAdd(&self->tickDuration, (int) encounteredTickDuration);
