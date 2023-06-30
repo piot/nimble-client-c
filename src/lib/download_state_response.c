@@ -52,7 +52,7 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     self->joinedGameState.stepId = stateId;
     self->joinStateId = stateId;
-    CLOG_C_DEBUG(&self->log, "start predicting from %08X", stateId);
+    CLOG_C_DEBUG(&self->log, "start predicting from %08X", stateId)
     nbsStepsReInit(&self->outSteps, stateId);
     self->state = NimbleClientStateJoiningDownloadingState;
     self->waitTime = 0;

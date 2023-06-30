@@ -32,7 +32,7 @@ ssize_t nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
             self->ticksWithoutIncomingDatagrams = 0;
             count++;
         } else if (octetCount < 0) {
-            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %zd", octetCount);
+            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %zd", octetCount)
             return octetCount;
         } else {
             break;

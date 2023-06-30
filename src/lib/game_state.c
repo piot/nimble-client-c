@@ -37,7 +37,7 @@ void nimbleClientGameStateDestroy(NimbleClientGameState* self)
 void nimbleClientGameStateDebug(const NimbleClientGameState* self, const char* debug)
 {
 #if defined CLOG_LOG_ENABLED
-    CLOG_INFO("game state '%s' stepId: %08X octetCount: %zu", debug, self->stepId, self->gameStateOctetCount);
+    CLOG_INFO("game state '%s' stepId: %08X octetCount: %zu", debug, self->stepId, self->gameStateOctetCount)
 #else
     (void) self;
     (void) debug;
