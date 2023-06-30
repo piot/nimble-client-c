@@ -58,7 +58,7 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
 
     ssize_t stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {
-        CLOG_C_SOFT_ERROR(&self->log, "GameStepResponse: nbsPendingStepsInSerialize() failed %d", stepCount)
+        CLOG_C_SOFT_ERROR(&self->log, "GameStepResponse: nbsPendingStepsInSerialize() failed %zd", stepCount)
         return stepCount;
     }
 
@@ -78,7 +78,7 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
 
 #if 1
     nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server", 0);
-    CLOG_C_VERBOSE(&self->log, "authoritative received steps count: %d (buffer size: %zu)", stepCount,
+    CLOG_C_VERBOSE(&self->log, "authoritative received steps count: %zd (buffer size: %zu)", stepCount,
                    self->authoritativeStepsFromServer.stepsCount)
 #endif
 
