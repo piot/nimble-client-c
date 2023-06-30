@@ -45,7 +45,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "--------------------- send join participant request");
+    CLOG_C_INFO(&self->log, "--------------------- send join participant request")
     nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
     self->waitTime = 64;
 
