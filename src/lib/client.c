@@ -9,7 +9,7 @@
 #include <nimble-steps-serialize/out_serialize.h>
 
 /// Resets the nimble client so it can be reused for the same transport
-/// @param self
+/// @param self nimble client
 void nimbleClientReset(NimbleClient* self)
 {
     nbsStepsReset(&self->outSteps);
@@ -58,8 +58,8 @@ void nimbleClientReset(NimbleClient* self)
 }
 
 /// Re-initializes the nimble client to be using another transport (connection)
-/// @param self
-/// @param transport
+/// @param self nimble client
+/// @param transport transport to use
 void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport)
 {
     self->transport = *transport;
@@ -67,15 +67,15 @@ void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport)
 }
 
 /// Initializes a nimble client
-/// @param self
-/// @param memory
-/// @param blobAllocator
-/// @param transport
-/// @param maximumSingleParticipantStepOctetCount
-/// @param maximumNumberOfParticipants
-/// @param applicationVersion
-/// @param log
-/// @return
+/// @param self nimble client
+/// @param memory tagAllocator
+/// @param blobAllocator freeAllocator
+/// @param transport the datagram transport to use
+/// @param maximumSingleParticipantStepOctetCount application specific step octet size
+/// @param maximumNumberOfParticipants maximum number of participants in a game
+/// @param applicationVersion application specific version
+/// @param log logging target
+/// @return negative on error
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, DatagramTransport* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
@@ -88,14 +88,14 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     if (maximumSingleParticipantStepOctetCount > maximumSingleStepCountAllowed) {
         CLOG_C_ERROR(&self->log, "nimbleClientInit. Single step octet count is not allowed %zu of %zu",
                      maximumSingleParticipantStepOctetCount, maximumSingleStepCountAllowed)
-        return -1;
+        // return -1;
     }
 
     const size_t maximumNumberOfParticipantsAllowed = 64;
     if (maximumNumberOfParticipants > maximumNumberOfParticipantsAllowed) {
         CLOG_C_ERROR(&self->log, "nimbleClientInit. maximum number of participant count is too high: %zu of %zu",
                      maximumNumberOfParticipants, maximumNumberOfParticipantsAllowed)
-        return -1;
+        // return -1;
     }
 
     self->memory = memory;
@@ -124,7 +124,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
 }
 
 /// Destroys a nimble client and frees the allocated memory
-/// @param self
+/// @param self nimble client
 void nimbleClientDestroy(NimbleClient* self)
 {
     if (self->joinedGameState.gameState != 0) {
@@ -134,7 +134,7 @@ void nimbleClientDestroy(NimbleClient* self)
 
 /// Disconnects the client
 /// @note not implemented yet
-/// @param self
+/// @param self nimble client
 void nimbleClientDisconnect(NimbleClient* self)
 {
     self->state = NimbleClientStateDisconnected;
@@ -188,9 +188,9 @@ static int sendPackets(NimbleClient* self)
 }
 
 /// Looks up the participant id for the specified local user device index
-/// @param self
-/// @param localUserDeviceIndex
-/// @param participantId
+/// @param self nimble client
+/// @param localUserDeviceIndex application specific user device index
+/// @param participantId the found participant ID
 /// @return 1 on success or negative on error
 int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDeviceIndex, uint8_t* participantId)
 {
@@ -234,12 +234,12 @@ static void checkIfDisconnectIsNeeded(NimbleClient* self)
 static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 {
     if (self->lastUpdateMonotonicMsIsSet) {
-        int encounteredTickDuration = now - self->lastUpdateMonotonicMs;
-        if (encounteredTickDuration + 10 < (int)self->expectedTickDurationMs) {
-            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %d", encounteredTickDuration)
+        MonotonicTimeMs encounteredTickDuration = now - self->lastUpdateMonotonicMs;
+        if (encounteredTickDuration + 10 < (int) self->expectedTickDurationMs) {
+            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %ld", encounteredTickDuration)
             return;
         }
-        statsIntAdd(&self->tickDuration, encounteredTickDuration);
+        statsIntAdd(&self->tickDuration, (int) encounteredTickDuration);
         if (self->tickDuration.avgIsSet) {
             if (abs((int) self->expectedTickDurationMs - self->tickDuration.avg) > 10) {
                 CLOG_C_VERBOSE(&self->log, "not holding tick rate: expected: %zu vs %d", self->expectedTickDurationMs,
@@ -253,9 +253,9 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 }
 
 /// Updates the nimble client
-/// @param self
-/// @param now
-/// @return
+/// @param self nimble client
+/// @param now current time with milliseconds resolution
+/// @return negative on error
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
     checkTickInterval(self, now);
@@ -263,9 +263,9 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     // Update all receive counters before receiving
     self->ticksWithoutIncomingDatagrams++;
 
-    int errorCode = nimbleClientReceiveAllInUdpBuffer(self);
+    ssize_t errorCode = nimbleClientReceiveAllInUdpBuffer(self);
     if (errorCode < 0) {
-        return errorCode;
+        return (int) errorCode;
     }
 
     checkIfDisconnectIsNeeded(self);
@@ -279,5 +279,5 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     showStats(self);
     sendPackets(self);
 
-    return errorCode;
+    return (int) errorCode;
 }

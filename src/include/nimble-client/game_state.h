@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 typedef struct NimbleClientGameState {
-    const uint8_t* gameState;
+    uint8_t* gameState;
     size_t gameStateOctetCount;
     StepId stepId;
     struct ImprintAllocatorWithFree* blobAllocator;

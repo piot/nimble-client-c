@@ -10,9 +10,9 @@
 /// Handle incoming game state response (NimbleSerializeCmdGameStateResponse) from server.
 /// If response haven't been received before, it sets the joinStateChannel and
 /// sets the state to NimbleClientStateJoiningDownloadingState, to start receiving the game state.
-/// @param self
-/// @param inStream
-/// @return
+/// @param self nimble protocol client
+/// @param inStream stream to read from
+/// @return negative on error
 int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inStream)
 {
     NimbleSerializeStateId stateId;
@@ -52,7 +52,7 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     self->joinedGameState.stepId = stateId;
     self->joinStateId = stateId;
-    CLOG_C_DEBUG(&self->log, "start predicting from %08X", stateId);
+    CLOG_C_DEBUG(&self->log, "start predicting from %08X", stateId)
     nbsStepsReInit(&self->outSteps, stateId);
     self->state = NimbleClientStateJoiningDownloadingState;
     self->waitTime = 0;

@@ -42,8 +42,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 
     //    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
 
-
-    int stepsInBuffer = (int) self->outSteps.stepsCount - NimbleSerializeMaxRedundancyCount;
+    int stepsInBuffer = (int) self->outSteps.stepsCount - (int) NimbleSerializeMaxRedundancyCount;
     if (stepsInBuffer < 0) {
         stepsInBuffer = 0;
     }
@@ -57,8 +56,8 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 }
 
 /// Sends predicted steps to the server using the unreliable datagram transport
-/// @param self
-/// @param transportOut
+/// @param self nimble protocol clinet
+/// @param transportOut transport to send on
 /// @return negative on error
 int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* transportOut)
 {

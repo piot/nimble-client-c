@@ -45,7 +45,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "--------------------- send join participant request");
+    CLOG_C_INFO(&self->log, "--------------------- send join participant request")
     nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
     self->waitTime = 64;
 
@@ -72,10 +72,10 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
             return sendDownloadStateAck(self, outStream);
         case NimbleClientStateIdle:
             return 0;
+        case NimbleClientStateDisconnected:
+            return 0;
         case NimbleClientStateSynced:
             return updateSyncedSubState(self, outStream);
-        default:
-            CLOG_ERROR("Unknown state %d", self->state)
     }
 }
 
@@ -90,7 +90,9 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
         case NimbleClientStateDisconnected:
             return 0;
 
-        default: {
+        case NimbleClientStateJoiningRequestingState:
+        case NimbleClientStateJoiningDownloadingState:
+        case NimbleClientStateSynced: {
             if (self->state == NimbleClientStateSynced) {
                 int sendStepsError = nimbleClientSendStepsToServer(self, transportOut);
                 if (sendStepsError < 0) {
@@ -116,9 +118,8 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 }
 
 /// Sends message to server depending on nimble client state
-/// @param self
-/// @param now
-/// @param transportOut
+/// @param self nimble protocol client
+/// @param transportOut transport to send using
 /// @return negative on error.
 int nimbleClientOutgoing(NimbleClient* self, DatagramTransportOut* transportOut)
 {

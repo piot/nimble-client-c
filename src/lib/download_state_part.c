@@ -28,8 +28,8 @@ static void trySetInitialGameState(NimbleClient* self)
 /// Handle incoming message NimbleSerializeCmdGameStatePart
 /// Receives a blob stream chunk. If the blob stream is completed, it sets the game state to joinedGameState
 /// and goes to NimbleClientStatePlaying.
-/// @param self
-/// @param inStream
+/// @param self nimble protocol client
+/// @param inStream stream to read download game state part from
 /// @return negative numbers on error.
 int nimbleClientOnDownloadGameStatePart(NimbleClient* self, FldInStream* inStream)
 {

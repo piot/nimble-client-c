@@ -7,11 +7,11 @@
 #include <nimble-client/game_state.h>
 
 /// Initializes and allocates memory for the Game State
-/// @param self
-/// @param blobAllocator
+/// @param self nimble client game state
+/// @param blobAllocator allocator with free
 /// @param stepId the tickId where it was captured
-/// @param gameState
-/// @param gameStateOctetCount
+/// @param gameState application specific game state
+/// @param gameStateOctetCount octet size of gameState
 void nimbleClientGameStateInit(NimbleClientGameState* self, struct ImprintAllocatorWithFree* blobAllocator,
                                StepId stepId, const uint8_t* gameState, size_t gameStateOctetCount)
 {
@@ -23,7 +23,7 @@ void nimbleClientGameStateInit(NimbleClientGameState* self, struct ImprintAlloca
 }
 
 /// Free the memory allocated on initialize.
-/// @param self
+/// @param self nimble client game state
 void nimbleClientGameStateDestroy(NimbleClientGameState* self)
 {
     IMPRINT_FREE(self->blobAllocator, self->gameState);
@@ -32,9 +32,14 @@ void nimbleClientGameStateDestroy(NimbleClientGameState* self)
 }
 
 /// Logs the internal information about the game state. only for debugging.
-/// @param self
-/// @param debug
+/// @param self nimble client game state
+/// @param debug prefix description
 void nimbleClientGameStateDebug(const NimbleClientGameState* self, const char* debug)
 {
-    CLOG_INFO("game state '%s' stepId: %08X octetCount: %zu", debug, self->stepId, self->gameStateOctetCount);
+#if defined CLOG_LOG_ENABLED
+    CLOG_INFO("game state '%s' stepId: %08X octetCount: %zu", debug, self->stepId, self->gameStateOctetCount)
+#else
+    (void) self;
+    (void) debug;
+#endif
 }

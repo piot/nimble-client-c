@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
 
         if ((frame % 2) == 0 && reportedState == NimbleClientRealizeStateSynced &&
             nbsStepsAllowedToAdd(&clientRealize.client.outSteps)) {
-            CLOG_VERBOSE("adding out step %016X", clientRealize.client.outSteps.expectedWriteId);
+            CLOG_VERBOSE("adding out step %016X", clientRealize.client.outSteps.expectedWriteId)
             NimbleStepsOutSerializeLocalParticipants data;
             char stepString[32];
             snprintf(stepString, 32, "OneStep %016X", clientRealize.client.outSteps.expectedWriteId);
@@ -128,11 +128,11 @@ int main(int argc, char* argv[])
             struct NimbleStepsOutSerializeLocalParticipants participants;
 
             nbsStepsInSerializeStepsForParticipantsFromOctets(&participants, readPayload, payloadOctetCount);
-            CLOG_DEBUG("read step %016X  octetCount: %d", readStepId, payloadOctetCount);
+            CLOG_DEBUG("read step %016X  octetCount: %d", readStepId, payloadOctetCount)
             for (size_t i = 0; i < participants.participantCount; ++i) {
                 NimbleStepsOutSerializeLocalParticipant* participant = &participants.participants[i];
                 CLOG_DEBUG(" participant %d '%s' octetCount: %zu", participant->participantId, participant->payload,
-                           participant->payloadCount);
+                           participant->payloadCount)
             }
         }
 

@@ -13,7 +13,7 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
     uint8_t participantCount;
     fldInStreamReadUInt8(inStream, &participantCount);
     if (participantCount > NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT) {
-        CLOG_ERROR("we can not have more than %d local users (%d)", NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT,
+        CLOG_SOFT_ERROR("we can not have more than %d local users (%d)", NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT,
                    participantCount)
         return -1;
     }
@@ -34,9 +34,9 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
 }
 
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
-/// @param self
-/// @param inStream
-/// @return
+/// @param self nimble protocol client
+/// @param inStream stream to read from
+/// @return negative on error
 int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
 {
     int participantCount = readParticipantConnectionIdAndParticipants(self, inStream);

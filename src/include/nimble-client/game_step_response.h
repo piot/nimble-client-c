@@ -8,6 +8,8 @@
 struct NimbleClient;
 struct FldInStream;
 
-int nimbleClientOnGameStepResponse(struct NimbleClient* self, struct FldInStream* inStream);
+#include <stddef.h>
+
+ssize_t nimbleClientOnGameStepResponse(struct NimbleClient* self, struct FldInStream* inStream);
 
 #endif
