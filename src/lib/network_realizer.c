@@ -7,8 +7,8 @@
 #include <nimble-client/network_realizer.h>
 
 /// Initializes the state machine
-/// @param self
-/// @param settings
+/// @param self client realize
+/// @param settings settings
 void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings)
 {
     self->targetState = NimbleClientRealizeStateInit;
@@ -40,8 +40,8 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 
 /// Starts the joining of participants
 /// Sends join request to the server and hopefully gets back a join result with the participant IDs.
-/// @param self
-/// @param options
+/// @param self client realize
+/// @param options join game options
 void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
 {
     self->client.joinGameOptions = options;
@@ -57,8 +57,8 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 
 /// Updates the state machine
 /// It tries to go from the current state to the targetState
-/// @param self
-/// @param now
+/// @param self client realize
+/// @param now current time
 void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
 {
     if (self->client.state == NimbleClientStateDisconnected) {
@@ -76,6 +76,12 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
     }
 
     switch (self->targetState) {
+        case NimbleClientRealizeStateInit:
+            break;
+        case NimbleClientRealizeStateReInit:
+            break;
+        case NimbleClientRealizeStateDisconnected:
+            break;
         case NimbleClientRealizeStateCleared:
             if (self->state != NimbleClientRealizeStateCleared) {
                 self->state = self->targetState;
@@ -88,8 +94,6 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
             } else if (self->client.state == NimbleClientStateSynced) {
                 self->state = NimbleClientRealizeStateSynced;
             }
-            break;
-        default:
             break;
     }
 }

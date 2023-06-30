@@ -15,19 +15,21 @@
 
 static int readAndCheckOrderedDatagram(OrderedDatagramInLogic* inLogic, FldInStream* inStream, Clog* log)
 {
+    (void) log;
+
     int idDelta = orderedDatagramInLogicReceive(inLogic, inStream);
 
     if (idDelta <= 0) {
         return -91;
     }
-    
+
     return idDelta;
 }
 
 /// Acts on the incoming octets received from the server
-/// @param self
-/// @param data
-/// @param len
+/// @param self nimble protocol client
+/// @param data received octet payload
+/// @param len octet length of data
 /// @return negative on error.
 int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 {
@@ -58,7 +60,7 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
             result = nimbleClientOnDownloadGameStatePart(self, &inStream);
             break;
         case NimbleSerializeCmdGameStepResponse:
-            result = nimbleClientOnGameStepResponse(self, &inStream);
+            result = (int) nimbleClientOnGameStepResponse(self, &inStream);
             break;
         case NimbleSerializeCmdJoinGameResponse:
             result = nimbleClientOnJoinGameResponse(self, &inStream);
@@ -67,7 +69,7 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
             result = nimbleClientOnDownloadGameStateResponse(self, &inStream);
             break;
         default:
-            CLOG_C_ERROR(&self->log, "unknown message %02X", cmd)
+            CLOG_C_SOFT_ERROR(&self->log, "unknown message %02X", cmd)
             return -1;
     }
 

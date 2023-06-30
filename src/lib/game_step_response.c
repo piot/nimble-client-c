@@ -10,10 +10,10 @@
 
 /// Handle game step response (`NimbleSerializeCmdGameStepResponse`) from server.
 /// Stream contains authoritative Steps from the server.
-/// @param self
-/// @param inStream
-/// @return
-int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
+/// @param self nimble protocol client
+/// @param inStream stream to read from
+/// @return negative on error
+ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
 {
     uint8_t stepCountInIncomingBufferOnServer;
     fldInStreamReadUInt8(inStream, &stepCountInIncomingBufferOnServer);
@@ -33,10 +33,14 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
     fldInStreamReadUInt16(inStream, &monotonicTimeShortMs);
     MonotonicTimeMs now = monotonicTimeMsNow();
     MonotonicTimeMs sentAt = monotonicTimeMsFromLowerBits(now, monotonicTimeShortMs);
-    self->latencyMs = now - sentAt;
+    if (now < sentAt) {
+        CLOG_C_NOTICE(&self->log, "time problems in lower bits")
+    } else {
+        self->latencyMs = (size_t) (now - sentAt);
+    }
 
     if (self->useStats) {
-        statsIntAdd(&self->latencyMsStat, self->latencyMs);
+        statsIntAdd(&self->latencyMsStat, (int) self->latencyMs);
     }
 
     LagometerPacket packet = {LagometerPacketStatusReceived, self->latencyMs, inStream->size};
@@ -52,7 +56,7 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
 
     CLOG_C_VERBOSE(&self->log, "gameStep: received from server %08X", receivedStepIdFromRemote)
 
-    int stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
+    ssize_t stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {
         CLOG_C_SOFT_ERROR(&self->log, "GameStepResponse: nbsPendingStepsInSerialize() failed %d", stepCount)
         return stepCount;
@@ -62,14 +66,14 @@ int nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream)
                                          &self->authoritativePendingStepsFromServer);
     if (copyResult < 0) {
         CLOG_C_ERROR(&self->log, "nbsPendingStepsCopy failed: %d", copyResult)
-        return copyResult;
+        // return copyResult;
     }
 
     statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
         self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
-        statsIntPerSecondAdd(&self->simulationStepsPerSecond, stepCount);
+        statsIntPerSecondAdd(&self->simulationStepsPerSecond, (int) stepCount);
     }
 
 #if 1

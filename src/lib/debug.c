@@ -6,6 +6,7 @@
 #include <nimble-client/client.h>
 #include <nimble-client/debug.h>
 
+#if defined CLOG_LOG_ENABLED
 static const char* stateToString(NimbleClientState state)
 {
     static const char* lookup[] = {
@@ -15,17 +16,19 @@ static const char* stateToString(NimbleClientState state)
         "synced",
     };
 
-    if (state < 0 || state >= sizeof(lookup) / sizeof(lookup[0])) {
+    if (state >= sizeof(lookup) / sizeof(lookup[0])) {
         CLOG_ERROR("unknown nimble client state: %02X", state)
     }
 
     return lookup[state];
 }
+#endif
 
 /// Outputs the current state of the client to logging
 /// Only for debug purposes.
-/// @param self
+/// @param self nimble client
 void nimbleClientDebugOutput(const NimbleClient* self)
 {
+    (void) self;
     CLOG_C_DEBUG(&self->log, "nimbleClientState: %s", stateToString(self->state))
 }

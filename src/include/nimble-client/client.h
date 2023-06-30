@@ -110,7 +110,7 @@ typedef struct NimbleClient {
     size_t expectedTickDurationMs;
     StatsInt tickDuration;
 
-    int latencyMs;
+    size_t latencyMs;
 
     Lagometer lagometer;
 

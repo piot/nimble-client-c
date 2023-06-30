@@ -9,30 +9,30 @@
 
 /// Reads from the unreliable datagram transport and feeds to the nimble client.
 /// Feeds it to nimbleClientFeed().
-/// @param self
+/// @param self nimble protocol client
 /// @return the number of datagrams received, or negative on error
-int nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
+ssize_t nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
 {
 #define UDP_MAX_RECEIVE_BUF_SIZE (1200)
     uint8_t receiveBuf[UDP_MAX_RECEIVE_BUF_SIZE];
     size_t count = 0;
     while (1) {
-        int octetCount = datagramTransportReceive(&self->transport, receiveBuf, UDP_MAX_RECEIVE_BUF_SIZE);
+        ssize_t octetCount = datagramTransportReceive(&self->transport, receiveBuf, UDP_MAX_RECEIVE_BUF_SIZE);
         if (octetCount > 0) {
             if (self->useStats) {
                 statsIntPerSecondAdd(&self->packetsPerSecondIn, 1);
             }
-#if NIMBLE_CLIENT_LOG_VERBOSE
+#if defined NIMBLE_CLIENT_LOG_VERBOSE
             nimbleSerializeDebugHex("received", receiveBuf, octetCount);
 #endif
-            int err = nimbleClientFeed(self, receiveBuf, octetCount);
+            int err = nimbleClientFeed(self, receiveBuf, (size_t) octetCount);
             if (err < 0) {
                 return err;
             }
             self->ticksWithoutIncomingDatagrams = 0;
             count++;
         } else if (octetCount < 0) {
-            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %d", octetCount);
+            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %zd", octetCount);
             return octetCount;
         } else {
             break;

@@ -5,7 +5,7 @@
 #include <nimble-client/client.h>
 
 /// Reads a single combined authoritative steps that has been received from the nimble server.
-/// @param self
+/// @param self nimble protocol client
 /// @param target target buffer that receives the combined authoritative step.
 /// @param maxTarget maximum number of octets in target buffer.
 /// @param outStepId the tickId for when the input should be applied to before simulation tick().
