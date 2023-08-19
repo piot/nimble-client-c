@@ -54,7 +54,7 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
 
     nbsStepsDiscardUpTo(&self->outSteps, receivedStepIdFromRemote + 1);
 
-    CLOG_C_VERBOSE(&self->log, "gameStep: received from server %08X", receivedStepIdFromRemote)
+    CLOG_C_VERBOSE(&self->log, "gameStep: received pending step from server %08X", receivedStepIdFromRemote)
 
     ssize_t stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {

@@ -37,7 +37,7 @@ void nimbleClientReset(NimbleClient* self)
 
     MonotonicTimeMs now = monotonicTimeMsNow();
 
-    statsIntInit(&self->authoritativeBufferDeltaStat, 30);
+    statsIntInit(&self->authoritativeBufferDeltaStat, 10);
     statsIntPerSecondInit(&self->packetsPerSecondOut, now, 1000);
     statsIntPerSecondInit(&self->packetsPerSecondIn, now, 1000);
     statsIntPerSecondInit(&self->simulationStepsPerSecond, now, 1000);
