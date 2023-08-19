@@ -1,8 +1,12 @@
 depsversion = "0.0.0"
 
-name = "piot/nimble-client-c/examples"
+name = "piot/nimble-client-examples"
 version = "0.0.0"
 
 [[dependencies]]
 name = 'piot/udp-client-c'
+version = "*"
+
+[[dependencies]]
+name = 'piot/nimble-client'
 version = "*"

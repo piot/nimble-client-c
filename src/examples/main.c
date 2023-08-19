@@ -105,13 +105,13 @@ int main(int argc, char* argv[])
             data.participantCount = 1;
             uint8_t stepBuf[64];
 
-            int octetLength = nbsStepsOutSerializeStep(&data, stepBuf, 64);
+            ssize_t octetLength = nbsStepsOutSerializeStep(&data, stepBuf, 64);
             if (octetLength < 0) {
-                return octetLength;
+                return (int)octetLength;
             }
 
             int errorCode = nbsStepsWrite(&clientRealize.client.outSteps, clientRealize.client.outSteps.expectedWriteId,
-                                          stepBuf, octetLength);
+                                          stepBuf, (size_t)octetLength);
             if (errorCode < 0) {
                 return errorCode;
             }
@@ -127,26 +127,15 @@ int main(int argc, char* argv[])
         if (payloadOctetCount > 0) {
             struct NimbleStepsOutSerializeLocalParticipants participants;
 
-            nbsStepsInSerializeStepsForParticipantsFromOctets(&participants, readPayload, payloadOctetCount);
+            nbsStepsInSerializeStepsForParticipantsFromOctets(&participants, readPayload, (size_t) payloadOctetCount);
             CLOG_DEBUG("read step %016X  octetCount: %d", readStepId, payloadOctetCount)
             for (size_t i = 0; i < participants.participantCount; ++i) {
-                NimbleStepsOutSerializeLocalParticipant* participant = &participants.participants[i];
+                CLOG_EXECUTE(NimbleStepsOutSerializeLocalParticipant* participant = &participants.participants[i];)
                 CLOG_DEBUG(" participant %d '%s' octetCount: %zu", participant->participantId, participant->payload,
                            participant->payloadCount)
             }
         }
-
-        if (reportedState != clientRealize.state) {
-            reportedState = clientRealize.state;
-            switch (clientRealize.state) {
-                case NimbleClientRealizeStateInit:
-                case NimbleClientRealizeStateReInit:
-                case NimbleClientRealizeStateCleared:
-                case NimbleClientRealizeStateSynced:
-                    break;
-            }
-        }
     }
 
-    imprintDefaultSetupDestroy(&memory);
+    // imprintDefaultSetupDestroy(&memory);
 }
