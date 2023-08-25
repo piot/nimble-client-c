@@ -40,6 +40,7 @@ typedef enum NimbleClientState {
 typedef enum NimbleJoiningState {
     NimbleJoiningStateJoiningParticipant,
     NimbleJoiningStateJoinedParticipant,
+    NimbleJoiningStateOutOfParticipantSlots,
 } NimbleJoiningState;
 
 #define NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT (8)

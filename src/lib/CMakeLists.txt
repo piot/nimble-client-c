@@ -11,6 +11,7 @@ add_library(nimble-client STATIC
   game_step_response.c
   incoming.c
   incoming_api.c
+  join_game_participants_full.c
   join_game_response.c
   network_realizer.c
   outgoing.c

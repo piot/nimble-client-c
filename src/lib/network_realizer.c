@@ -36,6 +36,7 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 {
     nimbleClientReset(&self->client);
     self->state = NimbleClientRealizeStateCleared;
+    self->joinGameRequestNonce = 0;
 }
 
 /// Starts the joining of participants
@@ -44,6 +45,7 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 /// @param options join game options
 void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
 {
+    options.nonce = self->joinGameRequestNonce++;
     self->client.joinGameOptions = options;
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;

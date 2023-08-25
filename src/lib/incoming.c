@@ -10,6 +10,7 @@
 #include <nimble-client/download_state_response.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-client/incoming.h>
+#include <nimble-client/join_game_participants_full.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/debug.h>
 
@@ -67,6 +68,9 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
             break;
         case NimbleSerializeCmdGameStateResponse:
             result = nimbleClientOnDownloadGameStateResponse(self, &inStream);
+            break;
+        case NimbleSerializeCmdJoinGameOutOfParticipantSlotsResponse:
+            result = nimbleClientOnJoinGameParticipantOutOfSpaceResponse(self, &inStream);
             break;
         default:
             CLOG_C_SOFT_ERROR(&self->log, "unknown message %02X", cmd)

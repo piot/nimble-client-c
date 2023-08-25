@@ -46,6 +46,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_INFO(&self->log, "--------------------- send join participant request")
+
     nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
     self->waitTime = 64;
 
@@ -59,6 +60,8 @@ static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
         case NimbleJoiningStateJoiningParticipant:
             return sendJoinGameRequest(self, outStream);
         case NimbleJoiningStateJoinedParticipant:
+            return 0;
+        case NimbleJoiningStateOutOfParticipantSlots:
             return 0;
     }
 }

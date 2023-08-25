@@ -35,6 +35,7 @@ typedef struct NimbleClientRealize {
     NimbleClientRealizeState state;
     NimbleClient client;
     NimbleClientRealizeSettings settings;
+    NimbleSerializeNonce joinGameRequestNonce;
 } NimbleClientRealize;
 
 void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings);
