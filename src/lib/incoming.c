@@ -36,6 +36,8 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 {
     FldInStream inStream;
     fldInStreamInit(&inStream, data, len);
+    inStream.readDebugInfo = self->useDebugStreams;
+
 
     int delta = readAndCheckOrderedDatagram(&self->orderedDatagramIn, &inStream, &self->log);
     if (delta < 0) {

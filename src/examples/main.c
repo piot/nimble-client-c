@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
             data.participants[0].participantId = participantId;
             data.participants[0].payload = (const uint8_t*) stepString;
             data.participants[0].payloadCount = strlen(stepString) + 1;
+            data.participants[0].state = 0;
             data.participantCount = 1;
             uint8_t stepBuf[64];
 

@@ -83,6 +83,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      NimbleSerializeVersion applicationVersion, Clog log)
 {
     self->log = log;
+    self->useDebugStreams = true;
     self->applicationVersion = applicationVersion;
 
     const size_t maximumSingleStepCountAllowed = 24;

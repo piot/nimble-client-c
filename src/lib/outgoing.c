@@ -105,6 +105,7 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
+            outStream.writeDebugInfo = self->useDebugStreams;
             orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
             int result = sendMessageUsingStream(self, &outStream);
             if (result < 0) {

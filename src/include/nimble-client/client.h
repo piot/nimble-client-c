@@ -95,6 +95,7 @@ typedef struct NimbleClient {
     struct ImprintAllocatorWithFree* blobStreamAllocator;
 
     uint8_t participantsConnectionIndex;
+    NimbleSerializeParticipantConnectionSecret participantsConnectionSecret;
 
     NimbleSerializeGameJoinOptions joinGameOptions;
 
@@ -119,6 +120,8 @@ typedef struct NimbleClient {
     StatsHoldPositive impendingDisconnectWarning;
     size_t ticksWithoutIncomingDatagrams;
     size_t ticksWithoutAuthoritativeStepsFromInSerialize;
+
+    bool useDebugStreams;
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,

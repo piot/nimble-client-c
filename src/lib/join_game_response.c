@@ -5,10 +5,14 @@
 #include <flood/in_stream.h>
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
+#include <nimble-serialize/serialize.h>
+#include <inttypes.h>
 
 static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInStream* inStream)
 {
     fldInStreamReadUInt8(inStream, &self->participantsConnectionIndex);
+
+    nimbleSerializeInConnectionSecret(inStream, &self->participantsConnectionSecret);
 
     uint8_t participantCount;
     fldInStreamReadUInt8(inStream, &participantCount);
@@ -29,6 +33,8 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
         self->localParticipantLookup[i].localUserDeviceIndex = localIndex;
         self->localParticipantLookup[i].participantId = participantId;
     }
+
+    CLOG_C_DEBUG(&self->log, "joined game with connection secret %" PRIx64, self->participantsConnectionSecret)
 
     return participantCount;
 }
