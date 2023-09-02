@@ -39,7 +39,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
 
     nimbleSerializeClientOutConnect(stream, &connectOptions);
 
-    self->waitTime = 0;
+    self->waitTime = 4;
 
     return 0;
 }
@@ -51,7 +51,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
     fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
 
-    self->waitTime = 0;
+    self->waitTime = 4;
 
     return 0;
 }
@@ -61,7 +61,7 @@ static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
     CLOG_C_INFO(&self->log, "--------------------- send join participant request")
 
     nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
-    self->waitTime = 64;
+    self->waitTime = 4;
 
     return 0;
 }
