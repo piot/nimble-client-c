@@ -39,6 +39,7 @@ int main(int argc, char* argv[])
     CLOG_VERBOSE("example start")
     CLOG_VERBOSE("initialized")
 
+    NimbleSerializeVersion exampleApplicationVersion = {0x10, 0x20, 0x30};
     FldOutStream outStream;
 
     uint8_t buf[1024];
@@ -68,15 +69,14 @@ int main(int argc, char* argv[])
     settings.blobMemory = &memory.slabAllocator.info;
     settings.memory = &memory.tagAllocator.info;
     settings.transport = transport;
+    settings.applicationVersion = exampleApplicationVersion;
 
     nimbleClientRealizeInit(&clientRealize, &settings);
     nimbleClientRealizeReInit(&clientRealize, &settings);
 
-    NimbleSerializeVersion exampleApplicationVersion = {0x10, 0x20, 0x30};
     NimbleSerializeGameJoinOptions joinGameOptions;
     joinGameOptions.playerCount = 1;
     joinGameOptions.players[0].localIndex = 0xca;
-    joinGameOptions.applicationVersion = exampleApplicationVersion;
 
     nimbleClientRealizeJoinGame(&clientRealize, joinGameOptions);
 
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
             data.participants[0].participantId = participantId;
             data.participants[0].payload = (const uint8_t*) stepString;
             data.participants[0].payloadCount = strlen(stepString) + 1;
-            data.participants[0].state = 0;
+            //data.participants[0].connectState = 0;
             data.participantCount = 1;
             uint8_t stepBuf[64];
 

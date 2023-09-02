@@ -6,6 +6,7 @@
 #include <flood/in_stream.h>
 #include <imprint/allocator.h>
 #include <nimble-client/client.h>
+#include <nimble-client/connect_response.h>
 #include <nimble-client/download_state_part.h>
 #include <nimble-client/download_state_response.h>
 #include <nimble-client/game_step_response.h>
@@ -59,6 +60,9 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     int result = -1;
     switch (cmd) {
+        case NimbleSerializeCmdConnectResponse:
+            result = nimbleClientOnConnectResponse(self, &inStream);
+            break;
         case NimbleSerializeCmdGameStatePart:
             result = nimbleClientOnDownloadGameStatePart(self, &inStream);
             break;

@@ -11,9 +11,11 @@ static const char* stateToString(NimbleClientState state)
 {
     static const char* lookup[] = {
         "idle",
+        "requesting connect",
         "requesting game state",
         "downloading game state",
         "synced",
+        "disconnected",
     };
 
     if (state >= sizeof(lookup) / sizeof(lookup[0])) {

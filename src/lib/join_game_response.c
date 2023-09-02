@@ -6,11 +6,17 @@
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/serialize.h>
+#include <nimble-serialize/client_in.h>
 #include <inttypes.h>
 
 static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInStream* inStream)
 {
     fldInStreamReadUInt8(inStream, &self->participantsConnectionIndex);
+
+    uint8_t connectionBitMasks;
+    fldInStreamReadUInt8(inStream, &connectionBitMasks);
+
+    self->useDebugStreams = connectionBitMasks == 0x01;
 
     nimbleSerializeInConnectionSecret(inStream, &self->participantsConnectionSecret);
 
@@ -45,6 +51,7 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
 /// @return negative on error
 int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
 {
+    nimbleSerializeClientInConnectResponse()
     int participantCount = readParticipantConnectionIdAndParticipants(self, inStream);
     if (participantCount <= 0) {
         CLOG_SOFT_ERROR("couldn't read participant connection Id and participants")

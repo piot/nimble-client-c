@@ -27,6 +27,7 @@ typedef struct NimbleClientRealizeSettings {
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
     NimbleSerializeVersion applicationVersion;
+    bool wantsDebugStreams;
     Clog log;
 } NimbleClientRealizeSettings;
 

@@ -29,13 +29,26 @@ static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
     return 0;
 }
 
+static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
+{
+    CLOG_C_DEBUG(&self->log, "request connection")
+
+    NimbleSerializeConnectRequest connectOptions;
+    connectOptions.applicationVersion = self->applicationVersion;
+    connectOptions.useDebugStreams = self->wantsDebugStreams;
+
+    nimbleSerializeClientOutConnect(stream, &connectOptions);
+
+    self->waitTime = 0;
+
+    return 0;
+}
+
 static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_INFO(&self->log, "request downloading of state from server")
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
-    nimbleSerializeOutVersion(stream, &g_nimbleProtocolVersion);
-    nimbleSerializeOutVersion(stream, &self->applicationVersion);
     fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
 
     self->waitTime = 0;
@@ -69,6 +82,10 @@ static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
 static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStream* outStream)
 {
     switch (self->state) {
+        case NimbleClientStateRequestingConnect:
+            return sendConnectRequest(self, outStream);
+        case NimbleClientStateConnected:
+            return 0;
         case NimbleClientStateJoiningRequestingState:
             return sendStartDownloadStateRequest(self, outStream);
         case NimbleClientStateJoiningDownloadingState:
@@ -82,6 +99,7 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
     }
 }
 
+
 static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 {
 #define UDP_MAX_SIZE (1200)
@@ -90,9 +108,12 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
     switch (self->state) {
         case NimbleClientStateIdle:
             return 0;
+
+        case NimbleClientStateConnected:
         case NimbleClientStateDisconnected:
             return 0;
 
+        case NimbleClientStateRequestingConnect:
         case NimbleClientStateJoiningRequestingState:
         case NimbleClientStateJoiningDownloadingState:
         case NimbleClientStateSynced: {

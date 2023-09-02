@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.16.3)
 add_library(nimble-client STATIC 
   client.c
   client_utils.c
+  connect_response.c
   debug.c
   download_state_part.c
   download_state_response.c

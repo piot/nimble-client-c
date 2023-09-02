@@ -31,6 +31,8 @@ struct FldOutStream;
 
 typedef enum NimbleClientState {
     NimbleClientStateIdle,
+    NimbleClientStateRequestingConnect,
+    NimbleClientStateConnected,
     NimbleClientStateJoiningRequestingState,
     NimbleClientStateJoiningDownloadingState,
     NimbleClientStateSynced,
@@ -122,12 +124,13 @@ typedef struct NimbleClient {
     size_t ticksWithoutAuthoritativeStepsFromInSerialize;
 
     bool useDebugStreams;
+    bool wantsDebugStreams;
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, DatagramTransport* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
-                     NimbleSerializeVersion applicationVersion, Clog log);
+                     NimbleSerializeVersion applicationVersion, bool wantsDebugStreams, Clog log);
 void nimbleClientReset(NimbleClient* self);
 void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport);
 void nimbleClientDestroy(NimbleClient* self);
