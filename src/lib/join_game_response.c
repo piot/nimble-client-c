@@ -22,8 +22,12 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
         return err;
     }
 
+    if (self->joinParticipantPhase != NimbleJoiningStateJoiningParticipant) {
+        CLOG_C_VERBOSE(&self->log, "ignoring join game response. We are not in the process of joining (anymore?)")
+        return 0;
+    }
+
     self->participantsConnectionIndex = gameResponse.participantConnectionIndex;
-    self->useDebugStreams = gameResponse.participantConnectionSecret;
     self->participantsConnectionSecret = gameResponse.participantConnectionSecret;
     self->localParticipantCount = gameResponse.participantCount;
 
@@ -32,8 +36,8 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
         self->localParticipantLookup[i].participantId = (uint8_t) gameResponse.participants[i].id;
     }
 
-    CLOG_INFO("join game response. Connection index %d participants: %zu", self->participantsConnectionIndex,
-              self->localParticipantCount)
+    CLOG_C_DEBUG(&self->log, "join game response. connection index %d participant count: %zu secret: %" PRIX64,
+                 self->participantsConnectionIndex, self->localParticipantCount, self->participantsConnectionSecret)
 
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;

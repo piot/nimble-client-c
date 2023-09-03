@@ -14,14 +14,16 @@
 int nimbleClientOnConnectResponse(NimbleClient* self, FldInStream* inStream)
 {
     NimbleSerializeConnectResponse response;
+
     int err = nimbleSerializeClientInConnectResponse(inStream, &response);
     if (err < 0) {
         return err;
     }
 
-    self->useDebugStreams = response.useDebugStreams;
     if (self->state == NimbleClientStateRequestingConnect) {
         self->state = NimbleClientStateConnected;
+        self->useDebugStreams = response.useDebugStreams;
+        CLOG_C_DEBUG(&self->log, "connected. debug streams: %d", self->useDebugStreams)
     }
 
     return 0;

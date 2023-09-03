@@ -32,5 +32,5 @@ static const char* stateToString(NimbleClientState state)
 void nimbleClientDebugOutput(const NimbleClient* self)
 {
     (void) self;
-    CLOG_C_DEBUG(&self->log, "nimbleClientState: %s", stateToString(self->state))
+    CLOG_C_VERBOSE(&self->log, "nimbleClientState: %s", stateToString(self->state))
 }

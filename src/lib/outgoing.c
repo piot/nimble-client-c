@@ -31,13 +31,16 @@ static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 
 static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_DEBUG(&self->log, "request connection")
+    NimbleSerializeConnectRequest connectRequest;
+    connectRequest.applicationVersion = self->applicationVersion;
+    connectRequest.useDebugStreams = self->wantsDebugStreams;
 
-    NimbleSerializeConnectRequest connectOptions;
-    connectOptions.applicationVersion = self->applicationVersion;
-    connectOptions.useDebugStreams = self->wantsDebugStreams;
+    CLOG_EXECUTE(char buf[32]; char buf2[32];)
+    CLOG_C_DEBUG(&self->log, "request connection for application %s (nimble: %s). wants debug streams:%d",
+                 nimbleSerializeVersionToString(&connectRequest.applicationVersion, buf, 32),
+                 nimbleSerializeVersionToString(&g_nimbleProtocolVersion, buf2, 32), self->wantsDebugStreams)
 
-    nimbleSerializeClientOutConnectRequest(stream, &connectOptions);
+    nimbleSerializeClientOutConnectRequest(stream, &connectRequest);
 
     self->waitTime = 4;
 
@@ -46,7 +49,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
 
 static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "request downloading of state from server")
+    CLOG_C_VERBOSE(&self->log, "request downloading of state from server")
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
     fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
@@ -58,7 +61,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "--------------------- send join participant request")
+    CLOG_C_VERBOSE(&self->log, "--------------------- send join game request")
 
     nimbleSerializeClientOutJoinGameRequest(stream, &self->joinGameRequest);
     self->waitTime = 4;
@@ -98,7 +101,6 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
             return updateSyncedSubState(self, outStream);
     }
 }
-
 
 static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 {

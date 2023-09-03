@@ -97,6 +97,7 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
                     break;
                 case NimbleClientStateConnected:
                     self->client.state = NimbleClientStateJoiningRequestingState;
+                    self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
                     self->client.waitTime = 0;
                     break;
                 case NimbleClientStateSynced:
