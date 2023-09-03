@@ -3,11 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 #include <flood/in_stream.h>
-#include <inttypes.h>
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/client_in.h>
-#include <nimble-serialize/serialize.h>
+#include <inttypes.h>
 
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
 /// @param self nimble protocol client
