@@ -99,7 +99,7 @@ typedef struct NimbleClient {
     uint8_t participantsConnectionIndex;
     NimbleSerializeParticipantConnectionSecret participantsConnectionSecret;
 
-    NimbleSerializeGameJoinOptions joinGameOptions;
+    NimbleSerializeJoinGameRequest joinGameRequest;
 
     OrderedDatagramOutLogic orderedDatagramOut;
     OrderedDatagramInLogic orderedDatagramIn;

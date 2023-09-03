@@ -53,9 +53,9 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
 /// @return negative on error
 int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
 {
-    NimbleSerializeGameResponse gameResponse;
+    NimbleSerializeJoinGameResponse gameResponse;
 
-    int err = nimbleSerializeClientInGameJoinResponse(inStream, &gameResponse);
+    int err = nimbleSerializeClientInJoinGameResponse(inStream, &gameResponse);
     if (err < 0) {
         return err;
     }

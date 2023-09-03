@@ -261,7 +261,6 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 /// @return negative on error
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
-    CLOG_INFO("nimbleclient update")
     checkTickInterval(self, now);
 
     // Update all receive counters before receiving
@@ -275,7 +274,6 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     checkIfDisconnectIsNeeded(self);
 
     if (self->waitTime > 0) {
-        CLOG_INFO("nimbleclient wait time: %d", self->waitTime)
         self->waitTime--;
         return 0;
     }

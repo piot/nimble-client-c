@@ -37,7 +37,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
     connectOptions.applicationVersion = self->applicationVersion;
     connectOptions.useDebugStreams = self->wantsDebugStreams;
 
-    nimbleSerializeClientOutConnect(stream, &connectOptions);
+    nimbleSerializeClientOutConnectRequest(stream, &connectOptions);
 
     self->waitTime = 4;
 
@@ -60,7 +60,7 @@ static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_INFO(&self->log, "--------------------- send join participant request")
 
-    nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
+    nimbleSerializeClientOutJoinGameRequest(stream, &self->joinGameRequest);
     self->waitTime = 4;
 
     return 0;

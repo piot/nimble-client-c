@@ -42,11 +42,11 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 /// Starts the joining of participants
 /// Sends join request to the server and hopefully gets back a join result with the participant IDs.
 /// @param self client realize
-/// @param options join game options
-void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
+/// @param request join game request
+void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinGameRequest request)
 {
-    options.nonce = self->joinGameRequestNonce++;
-    self->client.joinGameOptions = options;
+    request.nonce = self->joinGameRequestNonce++;
+    self->client.joinGameRequest = request;
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
@@ -63,7 +63,6 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 /// @param now current time
 void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
 {
-    CLOG_INFO("realize update")
     if (self->client.state == NimbleClientStateDisconnected) {
         // If underlying nimble client has given up, we need to follow the example
         self->state = NimbleClientRealizeStateDisconnected;

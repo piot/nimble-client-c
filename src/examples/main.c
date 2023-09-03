@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
     nimbleClientRealizeInit(&clientRealize, &settings);
     nimbleClientRealizeReInit(&clientRealize, &settings);
 
-    NimbleSerializeGameJoinOptions joinGameOptions;
+    NimbleSerializeJoinGameRequest joinGameOptions;
     joinGameOptions.playerCount = 1;
     joinGameOptions.players[0].localIndex = 0xca;
 
