@@ -36,7 +36,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
     connectRequest.useDebugStreams = self->wantsDebugStreams;
 
     CLOG_EXECUTE(char buf[32]; char buf2[32];)
-    CLOG_C_DEBUG(&self->log, "request connection for application %s (nimble: %s). wants debug streams:%d",
+    CLOG_C_DEBUG(&self->log, "request connection for application version %s (nimble version %s). wants debug streams:%d",
                  nimbleSerializeVersionToString(&connectRequest.applicationVersion, buf, 32),
                  nimbleSerializeVersionToString(&g_nimbleProtocolVersion, buf2, 32), self->wantsDebugStreams)
 
