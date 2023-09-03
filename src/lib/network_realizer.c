@@ -5,6 +5,7 @@
 #include <imprint/allocator.h>
 #include <nimble-client/client.h>
 #include <nimble-client/network_realizer.h>
+#include <inttypes.h>
 
 /// Initializes the state machine
 /// @param self client realize
@@ -47,6 +48,7 @@ void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinG
 {
     request.nonce = self->joinGameRequestNonce++;
     self->client.joinGameRequest = request;
+    CLOG_C_DEBUG(&self->client.log, "setting state to join game. secret enabled: %d, secret:%" PRIX64, request.connectionSecretIsProvided, request.connectionSecret)
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
