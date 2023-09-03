@@ -5,33 +5,8 @@
 #include <flood/in_stream.h>
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
-
-static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInStream* inStream)
-{
-    fldInStreamReadUInt8(inStream, &self->participantsConnectionIndex);
-
-    uint8_t participantCount;
-    fldInStreamReadUInt8(inStream, &participantCount);
-    if (participantCount > NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT) {
-        CLOG_SOFT_ERROR("we can not have more than %d local users (%d)", NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT,
-                   participantCount)
-        return -1;
-    }
-
-    self->localParticipantCount = participantCount;
-
-    for (size_t i = 0; i < participantCount; ++i) {
-        uint8_t localIndex;
-        fldInStreamReadUInt8(inStream, &localIndex);
-        uint8_t participantId;
-        fldInStreamReadUInt8(inStream, &participantId);
-        CLOG_INFO("** -> I am participant id: %d (localIndex:%d)", participantId, localIndex)
-        self->localParticipantLookup[i].localUserDeviceIndex = localIndex;
-        self->localParticipantLookup[i].participantId = participantId;
-    }
-
-    return participantCount;
-}
+#include <nimble-serialize/client_in.h>
+#include <inttypes.h>
 
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
 /// @param self nimble protocol client
@@ -39,14 +14,29 @@ static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInS
 /// @return negative on error
 int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
 {
-    int participantCount = readParticipantConnectionIdAndParticipants(self, inStream);
-    if (participantCount <= 0) {
-        CLOG_SOFT_ERROR("couldn't read participant connection Id and participants")
-        return participantCount;
+    NimbleSerializeJoinGameResponse gameResponse;
+
+    int err = nimbleSerializeClientInJoinGameResponse(inStream, &gameResponse);
+    if (err < 0) {
+        return err;
     }
 
-    CLOG_INFO("join game response. Connection index %d participants: %d", self->participantsConnectionIndex,
-              participantCount)
+    if (self->joinParticipantPhase != NimbleJoiningStateJoiningParticipant) {
+        CLOG_C_VERBOSE(&self->log, "ignoring join game response. We are not in the process of joining (anymore?)")
+        return 0;
+    }
+
+    self->participantsConnectionIndex = gameResponse.participantConnectionIndex;
+    self->participantsConnectionSecret = gameResponse.participantConnectionSecret;
+    self->localParticipantCount = gameResponse.participantCount;
+
+    for (size_t i = 0; i < gameResponse.participantCount; ++i) {
+        self->localParticipantLookup[i].localUserDeviceIndex = (uint8_t) gameResponse.participants[i].localIndex;
+        self->localParticipantLookup[i].participantId = (uint8_t) gameResponse.participants[i].id;
+    }
+
+    CLOG_C_DEBUG(&self->log, "join game response. connection index %d participant count: %zu secret: %" PRIX64,
+                 self->participantsConnectionIndex, self->localParticipantCount, self->participantsConnectionSecret)
 
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;

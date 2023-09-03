@@ -5,6 +5,7 @@
 #include <imprint/allocator.h>
 #include <nimble-client/client.h>
 #include <nimble-client/network_realizer.h>
+#include <inttypes.h>
 
 /// Initializes the state machine
 /// @param self client realize
@@ -16,7 +17,7 @@ void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealiz
     self->settings = *settings;
     nimbleClientInit(&self->client, settings->memory, settings->blobMemory, &self->settings.transport,
                      settings->maximumSingleParticipantStepOctetCount, settings->maximumNumberOfParticipants,
-                     settings->applicationVersion, settings->log);
+                     settings->applicationVersion, settings->wantsDebugStreams, settings->log);
 }
 
 void nimbleClientRealizeReInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings)
@@ -42,11 +43,12 @@ void nimbleClientRealizeReset(NimbleClientRealize* self)
 /// Starts the joining of participants
 /// Sends join request to the server and hopefully gets back a join result with the participant IDs.
 /// @param self client realize
-/// @param options join game options
-void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options)
+/// @param request join game request
+void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinGameRequest request)
 {
-    options.nonce = self->joinGameRequestNonce++;
-    self->client.joinGameOptions = options;
+    request.nonce = self->joinGameRequestNonce++;
+    self->client.joinGameRequest = request;
+    CLOG_C_DEBUG(&self->client.log, "setting state to join game. secret enabled: %d, secret:%" PRIX64, request.connectionSecretIsProvided, request.connectionSecret)
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
@@ -90,12 +92,29 @@ void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
             }
             break;
         case NimbleClientRealizeStateSynced:
-            if (self->client.state == NimbleClientStateIdle) {
-                self->client.state = NimbleClientStateJoiningRequestingState;
-                self->client.waitTime = 0;
-            } else if (self->client.state == NimbleClientStateSynced) {
-                self->state = NimbleClientRealizeStateSynced;
+            switch (self->client.state) {
+                case NimbleClientStateIdle:
+                    self->client.state = NimbleClientStateRequestingConnect;
+                    self->client.waitTime = 0;
+                    break;
+                case NimbleClientStateConnected:
+                    self->client.state = NimbleClientStateJoiningRequestingState;
+                    self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
+                    self->client.waitTime = 0;
+                    break;
+                case NimbleClientStateSynced:
+                    self->state = NimbleClientRealizeStateSynced;
+                    self->client.waitTime = 0;
+                    break;
+
+                // If there is something in progress, do not do anything
+                case NimbleClientStateRequestingConnect:
+                case NimbleClientStateJoiningRequestingState:
+                case NimbleClientStateJoiningDownloadingState:
+                case NimbleClientStateDisconnected:
+                    break;
             }
+
             break;
     }
 }

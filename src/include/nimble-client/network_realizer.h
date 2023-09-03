@@ -27,6 +27,7 @@ typedef struct NimbleClientRealizeSettings {
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
     NimbleSerializeVersion applicationVersion;
+    bool wantsDebugStreams;
     Clog log;
 } NimbleClientRealizeSettings;
 
@@ -40,7 +41,7 @@ typedef struct NimbleClientRealize {
 
 void nimbleClientRealizeInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings);
 void nimbleClientRealizeReInit(NimbleClientRealize* self, const NimbleClientRealizeSettings* settings);
-void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeGameJoinOptions options);
+void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinGameRequest options);
 void nimbleClientRealizeDestroy(NimbleClientRealize* self);
 void nimbleClientRealizeReset(NimbleClientRealize* self);
 void nimbleClientRealizeQuitGame(NimbleClientRealize* self);

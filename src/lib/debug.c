@@ -11,9 +11,11 @@ static const char* stateToString(NimbleClientState state)
 {
     static const char* lookup[] = {
         "idle",
+        "requesting connect",
         "requesting game state",
         "downloading game state",
         "synced",
+        "disconnected",
     };
 
     if (state >= sizeof(lookup) / sizeof(lookup[0])) {
@@ -30,5 +32,5 @@ static const char* stateToString(NimbleClientState state)
 void nimbleClientDebugOutput(const NimbleClient* self)
 {
     (void) self;
-    CLOG_C_DEBUG(&self->log, "nimbleClientState: %s", stateToString(self->state))
+    CLOG_C_VERBOSE(&self->log, "nimbleClientState: %s", stateToString(self->state))
 }

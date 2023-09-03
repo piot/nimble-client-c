@@ -29,26 +29,42 @@ static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
     return 0;
 }
 
+static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
+{
+    NimbleSerializeConnectRequest connectRequest;
+    connectRequest.applicationVersion = self->applicationVersion;
+    connectRequest.useDebugStreams = self->wantsDebugStreams;
+
+    CLOG_EXECUTE(char buf[32]; char buf2[32];)
+    CLOG_C_DEBUG(&self->log, "request connection for application version %s (nimble version %s). wants debug streams:%d",
+                 nimbleSerializeVersionToString(&connectRequest.applicationVersion, buf, 32),
+                 nimbleSerializeVersionToString(&g_nimbleProtocolVersion, buf2, 32), self->wantsDebugStreams)
+
+    nimbleSerializeClientOutConnectRequest(stream, &connectRequest);
+
+    self->waitTime = 4;
+
+    return 0;
+}
+
 static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "request downloading of state from server")
+    CLOG_C_VERBOSE(&self->log, "request downloading of state from server")
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
-    nimbleSerializeOutVersion(stream, &g_nimbleProtocolVersion);
-    nimbleSerializeOutVersion(stream, &self->applicationVersion);
     fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
 
-    self->waitTime = 0;
+    self->waitTime = 4;
 
     return 0;
 }
 
 static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_INFO(&self->log, "--------------------- send join participant request")
+    CLOG_C_VERBOSE(&self->log, "--------------------- send join game request")
 
-    nimbleSerializeClientOutGameJoin(stream, &self->joinGameOptions);
-    self->waitTime = 64;
+    nimbleSerializeClientOutJoinGameRequest(stream, &self->joinGameRequest);
+    self->waitTime = 4;
 
     return 0;
 }
@@ -69,6 +85,10 @@ static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
 static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStream* outStream)
 {
     switch (self->state) {
+        case NimbleClientStateRequestingConnect:
+            return sendConnectRequest(self, outStream);
+        case NimbleClientStateConnected:
+            return 0;
         case NimbleClientStateJoiningRequestingState:
             return sendStartDownloadStateRequest(self, outStream);
         case NimbleClientStateJoiningDownloadingState:
@@ -90,9 +110,12 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
     switch (self->state) {
         case NimbleClientStateIdle:
             return 0;
+
+        case NimbleClientStateConnected:
         case NimbleClientStateDisconnected:
             return 0;
 
+        case NimbleClientStateRequestingConnect:
         case NimbleClientStateJoiningRequestingState:
         case NimbleClientStateJoiningDownloadingState:
         case NimbleClientStateSynced: {
@@ -105,6 +128,7 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
+            outStream.writeDebugInfo = self->useDebugStreams;
             orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
             int result = sendMessageUsingStream(self, &outStream);
             if (result < 0) {

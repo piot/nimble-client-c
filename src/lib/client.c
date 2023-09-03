@@ -80,9 +80,11 @@ void nimbleClientReInit(NimbleClient* self, DatagramTransport* transport)
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
                      struct ImprintAllocatorWithFree* blobAllocator, DatagramTransport* transport,
                      size_t maximumSingleParticipantStepOctetCount, size_t maximumNumberOfParticipants,
-                     NimbleSerializeVersion applicationVersion, Clog log)
+                     NimbleSerializeVersion applicationVersion, bool wantsDebugStreams, Clog log)
 {
     self->log = log;
+    self->useDebugStreams = false;
+    self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
 
     const size_t maximumSingleStepCountAllowed = 24;
@@ -264,7 +266,7 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     // Update all receive counters before receiving
     self->ticksWithoutIncomingDatagrams++;
 
-    ssize_t errorCode = nimbleClientReceiveAllInUdpBuffer(self);
+    ssize_t errorCode = nimbleClientReceiveAllDatagramsFromTransport(self);
     if (errorCode < 0) {
         return (int) errorCode;
     }
