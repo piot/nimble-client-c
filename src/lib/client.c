@@ -266,7 +266,7 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
     // Update all receive counters before receiving
     self->ticksWithoutIncomingDatagrams++;
 
-    ssize_t errorCode = nimbleClientReceiveAllInUdpBuffer(self);
+    ssize_t errorCode = nimbleClientReceiveAllDatagramsFromTransport(self);
     if (errorCode < 0) {
         return (int) errorCode;
     }

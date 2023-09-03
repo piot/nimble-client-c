@@ -11,7 +11,7 @@
 /// Feeds it to nimbleClientFeed().
 /// @param self nimble protocol client
 /// @return the number of datagrams received, or negative on error
-ssize_t nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
+ssize_t nimbleClientReceiveAllDatagramsFromTransport(NimbleClient* self)
 {
 #define UDP_MAX_RECEIVE_BUF_SIZE (1200)
     uint8_t receiveBuf[UDP_MAX_RECEIVE_BUF_SIZE];
@@ -32,7 +32,7 @@ ssize_t nimbleClientReceiveAllInUdpBuffer(NimbleClient* self)
             self->ticksWithoutIncomingDatagrams = 0;
             count++;
         } else if (octetCount < 0) {
-            CLOG_SOFT_ERROR("nimbleClientReceiveAllInUdpBuffer: error: %zd", octetCount)
+            CLOG_SOFT_ERROR("nimbleClientReceiveAllDatagramsFromTransport: error: %zd", octetCount)
             return octetCount;
         } else {
             break;

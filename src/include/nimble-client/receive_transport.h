@@ -7,6 +7,6 @@
 
 struct NimbleClient;
 
-ssize_t nimbleClientReceiveAllInUdpBuffer(struct NimbleClient* self);
+ssize_t nimbleClientReceiveAllDatagramsFromTransport(struct NimbleClient* self);
 
 #endif

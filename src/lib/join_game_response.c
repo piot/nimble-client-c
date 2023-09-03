@@ -9,44 +9,6 @@
 #include <nimble-serialize/client_in.h>
 #include <nimble-serialize/serialize.h>
 
-/*
-static int readParticipantConnectionIdAndParticipants(NimbleClient* self, FldInStream* inStream)
-{
-    fldInStreamReadUInt8(inStream, &self->participantsConnectionIndex);
-
-    uint8_t connectionBitMasks;
-    fldInStreamReadUInt8(inStream, &connectionBitMasks);
-
-    self->useDebugStreams = connectionBitMasks == 0x01;
-
-    nimbleSerializeInConnectionSecret(inStream, &self->participantsConnectionSecret);
-
-    uint8_t participantCount;
-    fldInStreamReadUInt8(inStream, &participantCount);
-    if (participantCount > NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT) {
-        CLOG_SOFT_ERROR("we can not have more than %d local users (%d)", NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT,
-                   participantCount)
-        return -1;
-    }
-
-    self->localParticipantCount = participantCount;
-
-    for (size_t i = 0; i < participantCount; ++i) {
-        uint8_t localIndex;
-        fldInStreamReadUInt8(inStream, &localIndex);
-        uint8_t participantId;
-        fldInStreamReadUInt8(inStream, &participantId);
-        CLOG_INFO("** -> I am participant id: %d (localIndex:%d)", participantId, localIndex)
-        self->localParticipantLookup[i].localUserDeviceIndex = localIndex;
-        self->localParticipantLookup[i].participantId = participantId;
-    }
-
-    CLOG_C_DEBUG(&self->log, "joined game with connection secret %" PRIx64, self->participantsConnectionSecret)
-
-    return participantCount;
-}
- */
-
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
 /// @param self nimble protocol client
 /// @param inStream stream to read from
