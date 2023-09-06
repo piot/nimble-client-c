@@ -3,9 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 #include <imprint/allocator.h>
-#include <nimble-client/client.h>
-#include <nimble-client/network_realizer.h>
 #include <inttypes.h>
+#include <nimble-client/client.h>
+#include <nimble-client/debug.h>
+#include <nimble-client/network_realizer.h>
 
 /// Initializes the state machine
 /// @param self client realize
@@ -48,7 +49,8 @@ void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinG
 {
     request.nonce = self->joinGameRequestNonce++;
     self->client.joinGameRequest = request;
-    CLOG_C_DEBUG(&self->client.log, "setting state to join game. secret enabled: %d, secret:%" PRIX64, request.connectionSecretIsProvided, request.connectionSecret)
+    CLOG_C_DEBUG(&self->client.log, "setting state to join game. secret enabled: %d, secret:%" PRIX64,
+                 request.connectionSecretIsProvided, request.connectionSecret)
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
@@ -65,6 +67,12 @@ void nimbleClientRealizeQuitGame(NimbleClientRealize* self)
 /// @param now current time
 void nimbleClientRealizeUpdate(NimbleClientRealize* self, MonotonicTimeMs now)
 {
+#if defined CLOG_LOG_ENABLED
+    if ((self->state != NimbleClientRealizeStateSynced) || self->state != self->targetState) {
+        nimbleClientRealizeDebugOutput(self);
+    }
+#endif
+
     if (self->client.state == NimbleClientStateDisconnected) {
         // If underlying nimble client has given up, we need to follow the example
         self->state = NimbleClientRealizeStateDisconnected;

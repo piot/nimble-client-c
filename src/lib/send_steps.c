@@ -17,8 +17,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
 
-#define COMMAND_DEBUG "ClientOut"
-    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdGameStep, COMMAND_DEBUG);
+    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdGameStep, &self->log);
 
     StepId expectedStepIdFromServer;
     uint64_t clientReceiveMask = nbsPendingStepsReceiveMask(&self->authoritativePendingStepsFromServer,

@@ -11,14 +11,12 @@
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
 
-#define DEBUG_PREFIX "Outgoing"
-
 static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_VERBOSE(&self->log, "game state ack to server on channel %04X. Game State is downloading to the client",
                    self->joinStateChannel)
 
-    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateStatus, DEBUG_PREFIX);
+    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateStatus, &self->log);
     nimbleSerializeOutBlobStreamChannelId(stream, self->joinStateChannel);
     int errorCode = blobStreamLogicInSend(&self->blobStreamInLogic, stream);
     if (errorCode < 0) {
@@ -36,11 +34,12 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
     connectRequest.useDebugStreams = self->wantsDebugStreams;
 
     CLOG_EXECUTE(char buf[32]; char buf2[32];)
-    CLOG_C_DEBUG(&self->log, "request connection for application version %s (nimble version %s). wants debug streams:%d",
+    CLOG_C_DEBUG(&self->log,
+                 "request connection for application version %s (nimble version %s). wants debug streams:%d",
                  nimbleSerializeVersionToString(&connectRequest.applicationVersion, buf, 32),
                  nimbleSerializeVersionToString(&g_nimbleProtocolVersion, buf2, 32), self->wantsDebugStreams)
 
-    nimbleSerializeClientOutConnectRequest(stream, &connectRequest);
+    nimbleSerializeClientOutConnectRequest(stream, &connectRequest, &self->log);
 
     self->waitTime = 4;
 
@@ -51,7 +50,7 @@ static int sendStartDownloadStateRequest(NimbleClient* self, FldOutStream* strea
 {
     CLOG_C_VERBOSE(&self->log, "request downloading of state from server")
 
-    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, DEBUG_PREFIX);
+    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateRequest, &self->log);
     fldOutStreamWriteUInt8(stream, self->downloadStateClientRequestId);
 
     self->waitTime = 4;
@@ -63,7 +62,7 @@ static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_VERBOSE(&self->log, "--------------------- send join game request")
 
-    nimbleSerializeClientOutJoinGameRequest(stream, &self->joinGameRequest);
+    nimbleSerializeClientOutJoinGameRequest(stream, &self->joinGameRequest, &self->log);
     self->waitTime = 4;
 
     return 0;
@@ -150,7 +149,7 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 /// @return negative on error.
 int nimbleClientOutgoing(NimbleClient* self, DatagramTransportOut* transportOut)
 {
-    if (self->state != NimbleClientStateSynced) {
+    if (self->state != NimbleClientStateSynced || true) {
         nimbleClientDebugOutput(self);
     }
 

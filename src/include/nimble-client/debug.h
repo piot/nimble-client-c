@@ -6,7 +6,9 @@
 #define NIMBLE_CLIENT_DEBUG_H
 
 struct NimbleClient;
+struct NimbleClientRealize;
 
 void nimbleClientDebugOutput(const struct NimbleClient* self);
+void nimbleClientRealizeDebugOutput(const struct NimbleClientRealize* self);
 
 #endif

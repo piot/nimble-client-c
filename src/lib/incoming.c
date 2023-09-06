@@ -55,7 +55,7 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     uint8_t cmd;
     fldInStreamReadUInt8(&inStream, &cmd);
-    CLOG_C_VERBOSE(&self->log, "cmd: %s", nimbleSerializeCmdToString(cmd))
+    CLOG_C_VERBOSE(&self->log, "incoming command: %s", nimbleSerializeCmdToString(cmd))
 
     int result = -1;
     switch (cmd) {
