@@ -39,6 +39,8 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
         self->latencyMs = (size_t) (now - sentAt);
     }
 
+    nimbleClientConnectionQualityGameStepLatency(&self->quality, self->latencyMs);
+
     if (self->useStats) {
         statsIntAdd(&self->latencyMsStat, (int) self->latencyMs);
     }
@@ -72,7 +74,7 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
     statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
     if (stepCount > 0) {
-        self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
+        nimbleClientConnectionQualityReceivedAuthoritativeSteps(&self->quality, (size_t) stepCount);
         statsIntPerSecondAdd(&self->simulationStepsPerSecond, (int) stepCount);
     }
 

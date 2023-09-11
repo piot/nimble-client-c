@@ -5,6 +5,7 @@ add_library(nimble-client STATIC
   client.c
   client_utils.c
   connect_response.c
+  connection_quality.c
   debug.c
   download_state_part.c
   download_state_response.c

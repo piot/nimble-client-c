@@ -51,8 +51,7 @@ void nimbleClientReset(NimbleClient* self)
     }
     self->joinedGameState.gameState = 0;
     self->downloadStateClientRequestId = 33;
-    self->ticksWithoutIncomingDatagrams = 0;
-    self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
+    nimbleClientConnectionQualityReset(&self->quality);
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
     lagometerInit(&self->lagometer);
@@ -111,8 +110,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
 
-    statsHoldPositiveInit(&self->droppingDatagramWarning, 20U);
-    statsHoldPositiveInit(&self->impendingDisconnectWarning, 20U);
+
 
     size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(maximumNumberOfParticipants,
                                                                               maximumSingleParticipantStepOctetCount);
@@ -122,6 +120,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     nbsStepsInit(&self->authoritativeStepsFromServer, self->memory, combinedStepOctetCount, log);
 
     nimbleClientReInit(self, transport);
+    nimbleClientConnectionQualityInit(&self->quality, log);
 
     return 0;
 }
@@ -209,30 +208,7 @@ int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDev
     return -1;
 }
 
-static void checkIfDisconnectIsNeeded(NimbleClient* self)
-{
-    if (self->state != NimbleClientStateSynced) {
-        return;
-    }
 
-    bool impendingDisconnectWarning = self->ticksWithoutIncomingDatagrams > 10U;
-    statsHoldPositiveAdd(&self->impendingDisconnectWarning, impendingDisconnectWarning);
-    if (self->ticksWithoutIncomingDatagrams > 20U) {
-        CLOG_C_NOTICE(&self->log, "no valid incoming datagrams for %zu ticks, disconnecting",
-                      self->ticksWithoutIncomingDatagrams)
-        self->state = NimbleClientStateDisconnected;
-    }
-
-    if (self->localParticipantCount > 0) {
-        if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 20U) {
-            CLOG_C_NOTICE(&self->log, "no new authoritative steps for %zu ticks - disconnecting",
-                          self->ticksWithoutAuthoritativeStepsFromInSerialize)
-            self->state = NimbleClientStateDisconnected;
-        }
-
-        self->ticksWithoutAuthoritativeStepsFromInSerialize++;
-    }
-}
 
 static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 {
@@ -255,6 +231,19 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
     self->lastUpdateMonotonicMs = now;
 }
 
+
+static void checkIfDisconnectIsNeeded(NimbleClient* self)
+{
+    if (self->state != NimbleClientStateSynced) {
+        return;
+    }
+
+    if (nimbleClientConnectionQualityShouldDisconnect(&self->quality))
+    {
+        self->state = NimbleClientStateDisconnected;
+    }
+}
+
 /// Updates the nimble client
 /// @param self nimble client
 /// @param now current time with milliseconds resolution
@@ -263,13 +252,12 @@ int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
     checkTickInterval(self, now);
 
-    // Update all receive counters before receiving
-    self->ticksWithoutIncomingDatagrams++;
-
     ssize_t errorCode = nimbleClientReceiveAllDatagramsFromTransport(self);
     if (errorCode < 0) {
         return (int) errorCode;
     }
+
+    nimbleClientConnectionQualityUpdate(&self->quality, self, now);
 
     checkIfDisconnectIsNeeded(self);
 

@@ -48,10 +48,8 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
         for (int i = 0; i < delta - 1; ++i) {
             lagometerAddPacket(&self->lagometer, droppedPacket);
         }
+        nimbleClientConnectionQualityDroppedDatagrams(&self->quality, (size_t) (delta-1));
     }
-
-    bool droppedDatagramWarning = delta > 1;
-    statsHoldPositiveAdd(&self->droppingDatagramWarning, droppedDatagramWarning);
 
     uint8_t cmd;
     fldInStreamReadUInt8(&inStream, &cmd);
