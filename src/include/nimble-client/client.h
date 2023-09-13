@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <nimble-client/connection_quality.h>
 
 struct ImprintAllocatorWithFree;
 struct ImprintAllocator;
@@ -118,10 +119,7 @@ typedef struct NimbleClient {
 
     Lagometer lagometer;
 
-    StatsHoldPositive droppingDatagramWarning;
-    StatsHoldPositive impendingDisconnectWarning;
-    size_t ticksWithoutIncomingDatagrams;
-    size_t ticksWithoutAuthoritativeStepsFromInSerialize;
+    NimbleClientConnectionQuality quality;
 
     bool useDebugStreams;
     bool wantsDebugStreams;

@@ -29,7 +29,7 @@ ssize_t nimbleClientReceiveAllDatagramsFromTransport(NimbleClient* self)
             if (err < 0) {
                 return err;
             }
-            self->ticksWithoutIncomingDatagrams = 0;
+            nimbleClientConnectionQualityReceivedUsableDatagram(&self->quality);
             count++;
         } else if (octetCount < 0) {
             CLOG_SOFT_ERROR("nimbleClientReceiveAllDatagramsFromTransport: error: %zd", octetCount)

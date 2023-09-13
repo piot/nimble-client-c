@@ -41,7 +41,6 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;
     self->joinStateChannel = 0;
-    self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
 
     return 0;
 }
