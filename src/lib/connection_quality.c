@@ -146,9 +146,10 @@ void nimbleClientConnectionQualityUpdate(NimbleClientConnectionQuality* self, Ni
             }
         }
     } else {
+#if defined CLOG_LOG_ENABLED
 #define BUF_SIZE (128)
         char buf[BUF_SIZE];
-
+#endif
         self->consideringDisconnectCounter++;
 
         if (self->consideringDisconnectCounter == 1) {
