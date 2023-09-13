@@ -1,12 +1,17 @@
 #include <nimble-client/client.h>
 #include <nimble-client/connection_quality.h>
 
+/// Initialize connection quality
+/// @param self connection quality
+/// @param log logging
 void nimbleClientConnectionQualityInit(NimbleClientConnectionQuality* self, Clog log)
 {
     self->log = log;
     nimbleClientConnectionQualityReset(self);
 }
 
+/// Reset all values
+/// @param self connection quality
 void nimbleClientConnectionQualityReset(NimbleClientConnectionQuality* self)
 {
     statsHoldPositiveInit(&self->droppingDatagramWarning, 20U);
@@ -20,17 +25,6 @@ void nimbleClientConnectionQualityReset(NimbleClientConnectionQuality* self)
     self->droppedDatagramCounter = 0;
     self->reason = NimbleConnectionQualityDisconnectReasonKeepConnection;
 }
-/*
-static float degrade(size_t v, size_t divisor)
-{
-    CLOG_ASSERT(divisor != 0, "divisor can not be zero")
-    if (v > divisor) {
-        return 1.f;
-    }
-
-    return (float) v / (float) divisor;
-}
-*/
 
 static float degradeLowIsBetter(size_t v, size_t divisor, size_t lowerThreshold)
 {
@@ -47,6 +41,9 @@ static float degradeLowIsBetter(size_t v, size_t divisor, size_t lowerThreshold)
     return 1.f - ((float) (v - lowerThreshold) / (float) (divisor - lowerThreshold));
 }
 
+/// Evaluate the connection quality
+/// @param self connection quality
+/// @return the disconnect recommendation
 static NimbleConnectionQualityDisconnectReason evaluate(NimbleClientConnectionQuality* self)
 {
     const uint maxTicksWithoutDatagrams = 40;
@@ -75,14 +72,8 @@ static NimbleConnectionQualityDisconnectReason evaluate(NimbleClientConnectionQu
 
     float totalDegrade = ticksWithoutDatagramsDegrade * ticksWithoutStepsDegrade * latencyDegrade * highJitterDegrade *
                          droppingPacketsDegrade;
-    // CLOG_C_NOTICE(&self->log, "highJitterDegrade %f, latencyDegrade: %f, noSteps: %f, noDatagrams: %f dropping: %f
-    // total: %f",
-    //             highJitterDegrade, latencyDegrade, ticksWithoutStepsDegrade, ticksWithoutDatagramsDegrade,
-    //             droppingPacketsDegrade,
-    //           totalDegrade)
 
     self->qualityRating = (uint8_t) (totalDegrade * 5.f);
-    // CLOG_C_NOTICE(&self->log, "qualityrating: %d", self->ratingStat.avg)
 
     statsIntAdd(&self->ratingStat, self->qualityRating);
 
@@ -97,6 +88,11 @@ static NimbleConnectionQualityDisconnectReason evaluate(NimbleClientConnectionQu
     return NimbleConnectionQualityDisconnectReasonKeepConnection;
 }
 
+/// Describes the current disconnect recommendation
+/// @param self connection quality
+/// @param buf string buffer to fill
+/// @param maxBufSize maximum number of characters in buffer
+/// @return the filled in buf
 const char* nimbleClientConnectionQualityDescribe(NimbleClientConnectionQuality* self, char* buf, size_t maxBufSize)
 {
     NimbleConnectionQualityDisconnectReason reason = evaluate(self);
@@ -119,6 +115,10 @@ const char* nimbleClientConnectionQualityDescribe(NimbleClientConnectionQuality*
     return buf;
 }
 
+/// Update the connection quality
+/// @param self connection quality
+/// @param client the nimble client to evaluate
+/// @param now current monotonic time
 void nimbleClientConnectionQualityUpdate(NimbleClientConnectionQuality* self, NimbleClient* client, MonotonicTimeMs now)
 {
     if (client->state != NimbleClientStateSynced) {
@@ -133,28 +133,6 @@ void nimbleClientConnectionQualityUpdate(NimbleClientConnectionQuality* self, Ni
         self->droppedDatagramCounter--;
     }
 
-    /*
-
-        bool impendingDisconnectWarning = self->ticksWithoutIncomingDatagrams > 10U;
-        statsHoldPositiveAdd(&self->impendingDisconnectWarning, impendingDisconnectWarning);
-        if (self->ticksWithoutIncomingDatagrams >= 30U) {
-            CLOG_C_NOTICE(&self->log, "no valid incoming datagrams for %zu ticks, disconnecting",
-                          self->ticksWithoutIncomingDatagrams)
-            self->state = NimbleClientStateDisconnected;
-        }
-
-        if (self->localParticipantCount > 0) {
-            if (self->ticksWithoutAuthoritativeStepsFromInSerialize > 20U) {
-                CLOG_C_NOTICE(&self->log, "no new authoritative steps for %zu ticks - disconnecting",
-                              self->ticksWithoutAuthoritativeStepsFromInSerialize)
-                self->state = NimbleClientStateDisconnected;
-            }
-
-            self->ticksWithoutAuthoritativeStepsFromInSerialize++;
-        }
-
-    */
-
     NimbleConnectionQualityDisconnectReason reason = evaluate(self);
     if (reason == NimbleConnectionQualityDisconnectReasonKeepConnection) {
         if (self->consideringDisconnectCounter > 0) {
@@ -164,26 +142,32 @@ void nimbleClientConnectionQualityUpdate(NimbleClientConnectionQuality* self, Ni
             }
         }
     } else {
-        #define BUF_SIZE (128)
+#define BUF_SIZE (128)
         char buf[BUF_SIZE];
 
         self->consideringDisconnectCounter++;
 
         if (self->consideringDisconnectCounter == 1) {
-            CLOG_C_NOTICE(&self->log, "noticed quality degration. %s", nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
+            CLOG_C_NOTICE(&self->log, "noticed quality degration. %s",
+                          nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
         }
 
         if ((self->consideringDisconnectCounter % 20) == 0) {
-            CLOG_C_NOTICE(&self->log, "still thinking about disconnecting: %s", nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
+            CLOG_C_NOTICE(&self->log, "still thinking about disconnecting: %s",
+                          nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
         }
 
         if (self->consideringDisconnectCounter > 60) {
             self->reason = reason;
-            CLOG_C_NOTICE(&self->log, "I gave up due to: %s", nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
+            CLOG_C_NOTICE(&self->log, "I gave up due to: %s",
+                          nimbleClientConnectionQualityDescribe(self, buf, BUF_SIZE))
         }
     }
 }
 
+/// Inform connection quality about dropped datagrams
+/// @param self connection quality
+/// @param delta number of dropped datagrams
 void nimbleClientConnectionQualityDroppedDatagrams(NimbleClientConnectionQuality* self, size_t delta)
 {
     bool droppedDatagramWarning = delta > 1;
@@ -194,25 +178,34 @@ void nimbleClientConnectionQualityDroppedDatagrams(NimbleClientConnectionQuality
     statsHoldPositiveAdd(&self->droppingDatagramWarning, droppedDatagramWarning);
 }
 
+/// Inform connection quality about having received a usable datagram
+/// @param self connection quality
 void nimbleClientConnectionQualityReceivedUsableDatagram(NimbleClientConnectionQuality* self)
 {
     self->ticksWithoutIncomingDatagrams = 0;
     statsHoldPositiveAdd(&self->droppingDatagramWarning, false);
 }
 
+/// Inform connection quality about a received authoritative steps
+/// @param self  connection quality
+/// @param delta number of steps added to the combined authoritative step
 void nimbleClientConnectionQualityReceivedAuthoritativeSteps(NimbleClientConnectionQuality* self, size_t delta)
 {
     (void) delta;
     self->ticksWithoutAuthoritativeStepsFromInSerialize = 0;
 }
 
+/// Inform connection quality about the current measured step latency
+/// @param self connection quality
+/// @param latencyInMs latency in milliseconds
 void nimbleClientConnectionQualityGameStepLatency(NimbleClientConnectionQuality* self, size_t latencyInMs)
 {
     statsIntAdd(&self->latencyMsStat, (int) latencyInMs);
-    // CLOG_C_NOTICE(&self->log, "set latency: %zu isSet:%d avg:%d", latencyInMs, self->latencyMsStat.avgIsSet,
-    //             self->latencyMsStat.avg)
 }
 
+/// Checks if the recommendation is to disconnect the connection
+/// @param self connection quality
+/// @return true if the connection should be disconnected
 bool nimbleClientConnectionQualityShouldDisconnect(const NimbleClientConnectionQuality* self)
 {
     return self->reason != NimbleConnectionQualityDisconnectReasonKeepConnection;
