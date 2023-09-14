@@ -5,6 +5,7 @@
 #include <flood/in_stream.h>
 #include <monotonic-time/lower_bits.h>
 #include <nimble-client/client.h>
+#include <nimble-client/pong.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-steps-serialize/pending_in_serialize.h>
 
@@ -27,22 +28,6 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
 
     if (self->useStats) {
         statsIntAdd(&self->authoritativeBufferDeltaStat, deltaAgainstServerAuthoritativeBuffer);
-    }
-
-    MonotonicTimeLowerBitsMs monotonicTimeShortMs;
-    fldInStreamReadUInt16(inStream, &monotonicTimeShortMs);
-    MonotonicTimeMs now = monotonicTimeMsNow();
-    MonotonicTimeMs sentAt = monotonicTimeMsFromLowerBits(now, monotonicTimeShortMs);
-    if (now < sentAt) {
-        CLOG_C_NOTICE(&self->log, "time problems in lower bits")
-    } else {
-        self->latencyMs = (size_t) (now - sentAt);
-    }
-
-    nimbleClientConnectionQualityGameStepLatency(&self->quality, self->latencyMs);
-
-    if (self->useStats) {
-        statsIntAdd(&self->latencyMsStat, (int) self->latencyMs);
     }
 
     LagometerPacket packet = {LagometerPacketStatusReceived, self->latencyMs, inStream->size};

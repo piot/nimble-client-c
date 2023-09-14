@@ -17,6 +17,8 @@ add_library(nimble-client STATIC
   join_game_response.c
   network_realizer.c
   outgoing.c
+  pong.c
+  prepare_header.c
   receive_transport.c
   send_steps.c)
 

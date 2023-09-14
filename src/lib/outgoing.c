@@ -8,8 +8,10 @@
 #include <nimble-client/debug.h>
 #include <nimble-client/outgoing.h>
 #include <nimble-client/send_steps.h>
+#include <nimble-client/prepare_header.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
+#include <monotonic-time/lower_bits.h>
 
 static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 {
@@ -127,13 +129,15 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
-            outStream.writeDebugInfo = self->useDebugStreams;
-            orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
+            outStream.writeDebugInfo = true; //self->useDebugStreams;
+
+            nimbleClientPrepareHeader(self, &outStream);
+
             int result = sendMessageUsingStream(self, &outStream);
             if (result < 0) {
                 return result;
             }
-            if (outStream.pos <= 2) {
+            if (outStream.pos <= 4) {
                 return 0;
             }
             orderedDatagramOutLogicCommit(&self->orderedDatagramOut);

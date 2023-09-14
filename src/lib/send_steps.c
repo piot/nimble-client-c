@@ -11,6 +11,7 @@
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
 #include <monotonic-time/lower_bits.h>
+#include <nimble-client/prepare_header.h>
 
 static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
@@ -26,9 +27,9 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     CLOG_C_VERBOSE(&self->log, "client is telling the server that the client is waiting for stepId %08X",
                    expectedStepIdFromServer)
 
-    MonotonicTimeLowerBitsMs lowerBitsMs = monotonicTimeMsToLowerBits(monotonicTimeMsNow());
 
-    int serializeOutErr = nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask, lowerBitsMs);
+
+    int serializeOutErr = nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask);
     if (serializeOutErr < 0) {
         return serializeOutErr;
     }
@@ -64,7 +65,10 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     uint8_t buf[UDP_MAX_SIZE];
     FldOutStream outStream;
     fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
-    orderedDatagramOutLogicPrepare(&self->orderedDatagramOut, &outStream);
+    outStream.writeDebugInfo = true;
+
+    nimbleClientPrepareHeader(self, &outStream);
+
     sendStepsToStream(self, &outStream);
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
     CLOG_C_VERBOSE(&self->log, "send steps to server %zu", outStream.pos)

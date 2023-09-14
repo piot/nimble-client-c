@@ -11,6 +11,7 @@
 #include <nimble-client/download_state_response.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-client/incoming.h>
+#include <nimble-client/pong.h>
 #include <nimble-client/join_game_participants_full.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/debug.h>
@@ -37,7 +38,9 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 {
     FldInStream inStream;
     fldInStreamInit(&inStream, data, len);
-    inStream.readDebugInfo = self->useDebugStreams;
+    inStream.readDebugInfo = true;
+
+    CLOG_C_VERBOSE(&self->log, "incoming %02X %02X %02X %02X %02X", data[0], data[1], data[2], data[3], data[4])
 
     int delta = readAndCheckOrderedDatagram(&self->orderedDatagramIn, &inStream, &self->log);
     if (delta < 0) {
@@ -49,6 +52,12 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
             lagometerAddPacket(&self->lagometer, droppedPacket);
         }
         nimbleClientConnectionQualityDroppedDatagrams(&self->quality, (size_t) (delta-1));
+    }
+
+
+    int err = nimbleClientReceivePong(self, &inStream);
+    if (err < 0) {
+        return err;
     }
 
     uint8_t cmd;
