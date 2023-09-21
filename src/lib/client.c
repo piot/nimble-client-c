@@ -86,10 +86,9 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
 
-    const size_t maximumSingleStepCountAllowed = 24;
-    if (maximumSingleParticipantStepOctetCount > maximumSingleStepCountAllowed) {
+    if (maximumSingleParticipantStepOctetCount > NimbleStepMaxSingleStepOctetCount) {
         CLOG_C_ERROR(&self->log, "nimbleClientInit. Single step octet count is not allowed %zu of %zu",
-                     maximumSingleParticipantStepOctetCount, maximumSingleStepCountAllowed)
+                     maximumSingleParticipantStepOctetCount, NimbleStepMaxSingleStepOctetCount)
         // return -1;
     }
 
