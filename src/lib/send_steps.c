@@ -13,7 +13,7 @@
 #include <monotonic-time/lower_bits.h>
 #include <nimble-client/prepare_header.h>
 
-static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
+static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
@@ -34,7 +34,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
         return serializeOutErr;
     }
 
-    int stepsActuallySent = nbsStepsOutSerialize(stream, &self->outSteps);
+    ssize_t stepsActuallySent = nbsStepsOutSerialize(stream, &self->outSteps);
     if (stepsActuallySent < 0) {
         CLOG_SOFT_ERROR("problem with steps out serialize")
         return stepsActuallySent;
@@ -52,7 +52,7 @@ static int sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     // firstStepToSend, firstStepToSend+stepsActuallySent-1);
     self->waitTime = 0;
 
-    return 0;
+    return stepsActuallySent;
 }
 
 /// Sends predicted steps to the server using the unreliable datagram transport
@@ -69,7 +69,11 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
 
     nimbleClientPrepareHeader(self, &outStream);
 
-    sendStepsToStream(self, &outStream);
+    ssize_t stepsSent = sendStepsToStream(self, &outStream);
+    if (stepsSent < 0) {
+        return (int)stepsSent;
+    }
+
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
     CLOG_C_VERBOSE(&self->log, "send steps to server %zu", outStream.pos)
     statsIntPerSecondAdd(&self->sentStepsDatagramCountPerSecond, 1);
