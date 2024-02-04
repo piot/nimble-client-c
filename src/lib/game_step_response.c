@@ -58,10 +58,10 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
 
     statsIntAdd(&self->waitingStepsFromServer, (int) self->authoritativeStepsFromServer.stepsCount);
 
-    if (stepCount > 0) {
+    //if (stepCount > 0) {
         nimbleClientConnectionQualityReceivedAuthoritativeSteps(&self->quality, (size_t) stepCount);
         statsIntPerSecondAdd(&self->simulationStepsPerSecond, (int) stepCount);
-    }
+    //}
 
 #if 1
     nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server", 0);
