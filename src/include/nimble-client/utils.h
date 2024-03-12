@@ -11,6 +11,6 @@
 
 struct NimbleClient;
 
-bool nimbleClientOptimalStepIdToSend(const struct NimbleClient* self, StepId* outStepId);
+bool nimbleClientOptimalStepIdToSend(const struct NimbleClient* self, StepId* outStepId, size_t* outDiff);
 
 #endif

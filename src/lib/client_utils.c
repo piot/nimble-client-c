@@ -65,17 +65,16 @@ static bool calculateOptimalSendPredictionTickCount(const NimbleClient* self, si
 /// @param[out] outStepId the stepId that should be sent
 /// @retval true if an optimal StepId could be calculated
 /// @retval false an optimal StepId could not be determined
-bool nimbleClientOptimalStepIdToSend(const NimbleClient* self, StepId* outStepId)
+bool nimbleClientOptimalStepIdToSend(const NimbleClient* self, StepId* outStepId, size_t* outDiff)
 {
-    size_t outDiff;
-    bool worked = calculateOptimalSendPredictionTickCount(self, &outDiff);
+    bool worked = calculateOptimalSendPredictionTickCount(self, outDiff);
     if (!worked) {
         *outStepId = NIMBLE_STEP_MAX;
         return false;
     }
 
     StepId lastReceivedAuthoritativeStepId = self->authoritativeStepsFromServer.expectedWriteId;
-    *outStepId = lastReceivedAuthoritativeStepId + (StepId) outDiff;
+    *outStepId = lastReceivedAuthoritativeStepId + (StepId) *outDiff;
 
     return true;
 }
