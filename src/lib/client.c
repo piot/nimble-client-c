@@ -214,7 +214,7 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
     if (self->lastUpdateMonotonicMsIsSet) {
         MonotonicTimeMs encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < (int) self->expectedTickDurationMs) {
-            CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %" PRIi64, encounteredTickDuration)
+            //CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %" PRIi64, encounteredTickDuration)
             return;
         }
         statsIntAdd(&self->tickDuration, (int) encounteredTickDuration);
@@ -249,6 +249,7 @@ static void checkIfDisconnectIsNeeded(NimbleClient* self)
 /// @return negative on error
 int nimbleClientUpdate(NimbleClient* self, MonotonicTimeMs now)
 {
+    self->loggingTickCount++;
     checkTickInterval(self, now);
 
     ssize_t errorCode = nimbleClientReceiveAllDatagramsFromTransport(self);

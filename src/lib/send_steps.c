@@ -6,16 +6,14 @@
 #include <flood/out_stream.h>
 #include <nimble-client/client.h>
 #include <nimble-client/send_steps.h>
-#include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
-#include <monotonic-time/lower_bits.h>
 #include <nimble-client/prepare_header.h>
 
 static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_VERBOSE(&self->log, "sending game steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
+    CLOG_C_VERBOSE(&self->log, "sending predicted steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdGameStep, &self->log);
@@ -75,7 +73,7 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     }
 
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
-    CLOG_C_VERBOSE(&self->log, "send steps to server %zu", outStream.pos)
+    CLOG_C_VERBOSE(&self->log, "send steps to server octetCount: %zu", outStream.pos)
     statsIntPerSecondAdd(&self->sentStepsDatagramCountPerSecond, 1);
     statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
     return transportOut->send(transportOut->self, outStream.octets, outStream.pos);

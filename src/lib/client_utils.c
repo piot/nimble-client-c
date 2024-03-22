@@ -17,6 +17,9 @@ static bool calculateOptimalSendPredictionTickCount(const NimbleClient* self, si
     // Latency is so critical to estimate the prediction tick count, so we can
     // not make an estimation without valid latency information.
     if (!hasLatencyStat) {
+        if (self->loggingTickCount % 4 == 0) {
+            CLOG_C_VERBOSE(&self->log, "no latency average yet. can not calculate optimal prediction tick count")
+        }
         return false;
     }
 
@@ -43,16 +46,32 @@ static bool calculateOptimalSendPredictionTickCount(const NimbleClient* self, si
     // We need to offset the latency calculation with the delta buffer information that is received from the server.
     bool hasBufferDeltaAverage = self->authoritativeBufferDeltaStat.avgIsSet;
     const size_t maximumBufferDeltaInfluenceInTicks = 5;
-    if (hasBufferDeltaAverage) {
-        int bufferDeltaAverage = self->authoritativeBufferDeltaStat.avg;
-        if (bufferDeltaAverage < 0) {
-            size_t positiveDiff = (size_t) -bufferDeltaAverage;
-            if (positiveDiff > maximumBufferDeltaInfluenceInTicks) {
-                positiveDiff = maximumBufferDeltaInfluenceInTicks;
-            }
 
-            optimalSendPredictionTickCount += positiveDiff;
+    int bufferDeltaAverage = 0;
+
+    if (hasBufferDeltaAverage) {
+        bufferDeltaAverage = self->authoritativeBufferDeltaStat.avg;
+    } else {
+        if (self->loggingTickCount % 4 == 0) {
+            CLOG_C_VERBOSE(&self->log, "no buffer delta average determined yet.")
         }
+    }
+
+    const int minimumBufferDelta = 2;
+    size_t bufferDeltaAddTickCount = 0;
+    if (bufferDeltaAverage < minimumBufferDelta) {
+        bufferDeltaAddTickCount = (size_t) (minimumBufferDelta - bufferDeltaAverage);
+        if (bufferDeltaAddTickCount > maximumBufferDeltaInfluenceInTicks) {
+            bufferDeltaAddTickCount = maximumBufferDeltaInfluenceInTicks;
+        }
+    }
+
+    optimalSendPredictionTickCount += bufferDeltaAddTickCount;
+
+    if (self->loggingTickCount % 20 == 0) {
+        CLOG_C_DEBUG(&self->log, "latency: %zu ms (count:%zu). bufferDelta:%d (count:%zu). totalTickCount:%zu",
+                     unsignedLatency, latencyInTicksRoundedUp, bufferDeltaAverage, bufferDeltaAddTickCount,
+                     optimalSendPredictionTickCount)
     }
 
     *outDiff = optimalSendPredictionTickCount;

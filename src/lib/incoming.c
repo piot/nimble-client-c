@@ -40,8 +40,6 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
     fldInStreamInit(&inStream, data, len);
     inStream.readDebugInfo = true;
 
-    CLOG_C_VERBOSE(&self->log, "incoming %02X %02X %02X %02X %02X", data[0], data[1], data[2], data[3], data[4])
-
     int delta = readAndCheckOrderedDatagram(&self->orderedDatagramIn, &inStream, &self->log);
     if (delta < 0) {
         return delta;

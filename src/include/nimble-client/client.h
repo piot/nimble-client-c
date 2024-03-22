@@ -123,6 +123,7 @@ typedef struct NimbleClient {
 
     bool useDebugStreams;
     bool wantsDebugStreams;
+    uint32_t loggingTickCount;
 } NimbleClient;
 
 int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
