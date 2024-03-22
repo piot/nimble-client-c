@@ -33,15 +33,15 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
     LagometerPacket packet = {LagometerPacketStatusReceived, self->latencyMs, inStream->size};
     lagometerAddPacket(&self->lagometer, packet);
 
-    uint32_t receivedStepIdFromRemote;
-    fldInStreamReadUInt32(inStream, &receivedStepIdFromRemote);
-    if (receivedStepIdFromRemote != self->receivedStepIdByServerOnlyForDebug) {
-        self->receivedStepIdByServerOnlyForDebug = receivedStepIdFromRemote;
+    uint32_t serverReceivedPredictedStepId;
+    fldInStreamReadUInt32(inStream, &serverReceivedPredictedStepId);
+    if (serverReceivedPredictedStepId != self->receivedStepIdByServerOnlyForDebug) {
+        self->receivedStepIdByServerOnlyForDebug = serverReceivedPredictedStepId;
     }
 
-    nbsStepsDiscardUpTo(&self->outSteps, receivedStepIdFromRemote + 1);
+    nbsStepsDiscardUpTo(&self->outSteps, serverReceivedPredictedStepId + 1);
 
-    CLOG_C_VERBOSE(&self->log, "gameStep: received authoritative step from server %08X", receivedStepIdFromRemote)
+    CLOG_C_VERBOSE(&self->log, "server has received predicted step %08X", serverReceivedPredictedStepId)
 
     ssize_t stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {
@@ -64,7 +64,7 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
     //}
 
 #if 1
-    nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server", 0);
+    nbsStepsDebugOutput(&self->authoritativeStepsFromServer, "authoritative steps from server after in serialize", 0);
     //CLOG_C_VERBOSE(&self->log, "authoritative received steps count: %zd (buffer size: %zu)", stepCount,
       //             self->authoritativeStepsFromServer.stepsCount)
 #endif

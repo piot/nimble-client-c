@@ -13,7 +13,7 @@
 
 static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
-    CLOG_C_VERBOSE(&self->log, "sending predicted steps id:%08X, last in buffer:%08X, buffer count:%zu", self->outSteps.expectedReadId,
+    CLOG_C_VERBOSE(&self->log, "sending predicted steps %08X - %08X, buffer count:%zu", self->outSteps.expectedReadId,
                    self->outSteps.expectedWriteId - 1, self->outSteps.stepsCount)
 
     nimbleSerializeWriteCommand(stream, NimbleSerializeCmdGameStep, &self->log);
@@ -22,10 +22,8 @@ static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
     uint64_t clientReceiveMask = nbsPendingStepsReceiveMask(&self->authoritativePendingStepsFromServer,
                                                             &expectedStepIdFromServer);
 
-    CLOG_C_VERBOSE(&self->log, "client is telling the server that the client is waiting for stepId %08X",
+    CLOG_C_VERBOSE(&self->log, "telling the server that we are waiting for authoritative step %08X",
                    expectedStepIdFromServer)
-
-
 
     int serializeOutErr = nbsPendingStepsSerializeOutHeader(stream, expectedStepIdFromServer, clientReceiveMask);
     if (serializeOutErr < 0) {

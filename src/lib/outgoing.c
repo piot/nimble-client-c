@@ -72,7 +72,7 @@ static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 
 static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
 {
-    CLOG_C_VERBOSE(&self->log, "participant phase: %d", self->joinParticipantPhase)
+    //CLOG_C_VERBOSE(&self->log, "participant phase: %d", self->joinParticipantPhase)
     switch (self->joinParticipantPhase) {
         case NimbleJoiningStateJoiningParticipant:
             return sendJoinGameRequest(self, outStream);
