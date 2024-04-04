@@ -1,7 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Peter Bjorklund. All rights reserved.
+/*----------------------------------------------------------------------------------------------------------
+ *  Copyright (c) Peter Bjorklund. All rights reserved. https://github.com/piot/nimble-client-c
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+ *--------------------------------------------------------------------------------------------------------*/
 #include <imprint/allocator.h>
 #include <inttypes.h>
 #include <nimble-client/client.h>
@@ -49,8 +49,8 @@ void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinG
 {
     request.nonce = self->joinGameRequestNonce++;
     self->client.joinGameRequest = request;
-    CLOG_C_DEBUG(&self->client.log, "setting state to join game. secret enabled: %d, secret:%" PRIX64,
-                 request.connectionSecretIsProvided, request.connectionSecret)
+    CLOG_C_DEBUG(&self->client.log, "setting state to join game. join type: %d, secret:%" PRIX64,
+                 request.joinGameType, request.connectionSecret)
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
 }
