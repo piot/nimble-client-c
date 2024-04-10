@@ -5,6 +5,7 @@ enable_testing()
 add_subdirectory(deps/piot/bit-array/src/lib)
 add_subdirectory(deps/piot/blob-stream/src/lib)
 add_subdirectory(deps/piot/clog/src/lib)
+add_subdirectory(deps/piot/connection-layer/src/lib)
 add_subdirectory(deps/piot/datagram-transport-c/src/lib)
 add_subdirectory(deps/piot/discoid-c/src/lib)
 add_subdirectory(deps/piot/flood-c/src/lib)
@@ -21,3 +22,4 @@ add_subdirectory(deps/piot/tiny-libc/src/lib)
 
 
 add_subdirectory(src)
+add_subdirectory(deps/piot/udp-client-c/src/lib)

@@ -131,15 +131,23 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
             outStream.writeDebugInfo = true; //self->useDebugStreams;
 
-            nimbleClientPrepareHeader(self, &outStream);
+            FldOutStreamStoredPosition restorePosition;
+            nimbleClientPrepareHeader(self, &outStream, &restorePosition );
 
             int result = sendMessageUsingStream(self, &outStream);
             if (result < 0) {
                 return result;
             }
+
+            result = nimbleClientCommitHeader(self, &outStream, restorePosition);
+            if (result < 0) {
+                return result;
+            }
+
             if (outStream.pos <= 4) {
                 return 0;
             }
+
             orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
             statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
             return transportOut->send(transportOut->self, outStream.octets, outStream.pos);

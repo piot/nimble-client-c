@@ -85,6 +85,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->useDebugStreams = false;
     self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
+    self->remoteConnectionId = 0;
 
     if (maximumSingleParticipantStepOctetCount > NimbleStepMaxSingleStepOctetCount) {
         CLOG_C_ERROR(&self->log, "nimbleClientInit. Single step octet count is not allowed %zu of %zu",

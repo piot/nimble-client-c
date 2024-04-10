@@ -8,6 +8,7 @@
 #include <stats/hold_positive.h>
 #include <clog/clog.h>
 #include <monotonic-time/monotonic_time.h>
+#include <stats/stats.h>
 
 struct NimbleClient;
 

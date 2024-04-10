@@ -36,5 +36,6 @@ target_link_libraries(nimble-client PUBLIC
   datagram-transport
   blob-stream
   ordered-datagram
+  connection-layer
   lagometer)
 

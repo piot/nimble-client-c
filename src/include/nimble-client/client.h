@@ -8,8 +8,11 @@
 #include <blob-stream/blob_stream_logic_in.h>
 #include <blob-stream/blob_stream_logic_out.h>
 #include <clog/clog.h>
+#include <connection-layer/incoming.h>
+#include <connection-layer/outgoing.h>
 #include <datagram-transport/transport.h>
 #include <lagometer/lagometer.h>
+#include <nimble-client/connection_quality.h>
 #include <nimble-client/game_state.h>
 #include <nimble-client/incoming_api.h>
 #include <nimble-serialize/client_out.h>
@@ -17,13 +20,12 @@
 #include <nimble-steps/steps.h>
 #include <ordered-datagram/in_logic.h>
 #include <ordered-datagram/out_logic.h>
+#include <stats/hold_positive.h>
 #include <stats/stats.h>
 #include <stats/stats_per_second.h>
-#include <stats/hold_positive.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <nimble-client/connection_quality.h>
 
 struct ImprintAllocatorWithFree;
 struct ImprintAllocator;
@@ -104,6 +106,8 @@ typedef struct NimbleClient {
 
     OrderedDatagramOutLogic orderedDatagramOut;
     OrderedDatagramInLogic orderedDatagramIn;
+    ConnectionLayerIncoming connectionLayerIncoming;
+    ConnectionLayerOutgoing connectionLayerOutgoing;
 
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
@@ -122,6 +126,7 @@ typedef struct NimbleClient {
     NimbleClientConnectionQuality quality;
 
     bool useDebugStreams;
+    uint8_t remoteConnectionId;
     bool wantsDebugStreams;
     uint32_t loggingTickCount;
 } NimbleClient;
