@@ -7,7 +7,7 @@
 #include <nimble-client/outgoing.h>
 #include <nimble-client/receive_transport.h>
 #include <nimble-steps-serialize/out_serialize.h>
-#include <inttypes.h>
+#include <secure-random/secure_random.h>
 
 /// Resets the nimble client so it can be reused for the same transport
 /// @param self nimble client
@@ -85,6 +85,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->useDebugStreams = false;
     self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
+    self->connectRequestNonce = secureRandomUInt64();
+    self->remoteConnectionId = 0;
 
     if (maximumSingleParticipantStepOctetCount > NimbleStepMaxSingleStepOctetCount) {
         CLOG_C_ERROR(&self->log, "nimbleClientInit. Single step octet count is not allowed %zu of %zu",

@@ -11,9 +11,9 @@
 #include <nimble-client/download_state_response.h>
 #include <nimble-client/game_step_response.h>
 #include <nimble-client/incoming.h>
-#include <nimble-client/pong.h>
 #include <nimble-client/join_game_participants_full.h>
 #include <nimble-client/join_game_response.h>
+#include <nimble-client/pong.h>
 #include <nimble-serialize/debug.h>
 
 static int readAndCheckOrderedDatagram(OrderedDatagramInLogic* inLogic, FldInStream* inStream, Clog* log)
@@ -40,6 +40,41 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
     fldInStreamInit(&inStream, data, len);
     inStream.readDebugInfo = true;
 
+    if (len < 1) {
+        return -1;
+    }
+
+    uint8_t connectionId;
+    fldInStreamReadUInt8(&inStream, &connectionId);
+
+    if (connectionId == 0) {
+        uint8_t cmd;
+        fldInStreamReadUInt8(&inStream, &cmd);
+        CLOG_C_VERBOSE(&self->log, "incoming oob command: %s", nimbleSerializeCmdToString(cmd))
+        int result = -1;
+        switch (cmd) {
+            case NimbleSerializeCmdConnectResponse:
+                result = nimbleClientOnConnectResponse(self, &inStream);
+                break;
+        }
+
+        return result;
+    }
+
+    if (self->remoteConnectionId != connectionId) {
+        CLOG_C_NOTICE(&self->log, "wrong remote connection ID, encountered %hhu, expected %hhu, ignoring packet", connectionId, self->remoteConnectionId)
+        return 0;
+    }
+    if (self->state == NimbleClientStateDisconnected) {
+        CLOG_C_NOTICE(&self->log, "we received a packet with connection ID, but we are not connected. ignoring.")
+        return 0;
+    }
+    int verifyStatus = connectionLayerIncomingVerify(&self->connectionLayerIncoming, &inStream);
+    if (verifyStatus < 0) {
+        CLOG_C_NOTICE(&self->log, "packet could not be verified, maybe previous connection? ignoring")
+        return 0;
+    }
+
     int delta = readAndCheckOrderedDatagram(&self->orderedDatagramIn, &inStream, &self->log);
     if (delta < 0) {
         return delta;
@@ -49,9 +84,8 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
         for (int i = 0; i < delta - 1; ++i) {
             lagometerAddPacket(&self->lagometer, droppedPacket);
         }
-        nimbleClientConnectionQualityDroppedDatagrams(&self->quality, (size_t) (delta-1));
+        nimbleClientConnectionQualityDroppedDatagrams(&self->quality, (size_t) (delta - 1));
     }
-
 
     int err = nimbleClientReceivePong(self, &inStream);
     if (err < 0) {
@@ -64,9 +98,6 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     int result = -1;
     switch (cmd) {
-        case NimbleSerializeCmdConnectResponse:
-            result = nimbleClientOnConnectResponse(self, &inStream);
-            break;
         case NimbleSerializeCmdGameStatePart:
             result = nimbleClientOnDownloadGameStatePart(self, &inStream);
             break;

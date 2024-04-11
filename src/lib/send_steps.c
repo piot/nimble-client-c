@@ -63,11 +63,17 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
     outStream.writeDebugInfo = true;
 
-    nimbleClientPrepareHeader(self, &outStream);
+    FldOutStreamStoredPosition restorePosition;
+    nimbleClientPrepareHeader(self, &outStream, &restorePosition);
 
     ssize_t stepsSent = sendStepsToStream(self, &outStream);
-    if (stepsSent < 0) {
+    if (stepsSent <= 0) {
         return (int)stepsSent;
+    }
+
+    int status = nimbleClientCommitHeader(self, &outStream, restorePosition);
+    if (status < 0) {
+        return status;
     }
 
     orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
