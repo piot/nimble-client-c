@@ -8,6 +8,7 @@
 #include <nimble-client/receive_transport.h>
 #include <nimble-steps-serialize/out_serialize.h>
 #include <secure-random/secure_random.h>
+#include <inttypes.h>
 
 /// Resets the nimble client so it can be reused for the same transport
 /// @param self nimble client
@@ -50,7 +51,7 @@ void nimbleClientReset(NimbleClient* self)
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
     self->joinedGameState.gameState = 0;
-    self->downloadStateClientRequestId = 33;
+    self->downloadStateClientRequestId = (uint8_t) secureRandomUInt64();
     nimbleClientConnectionQualityReset(&self->quality);
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
@@ -86,6 +87,7 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
     self->connectRequestNonce = secureRandomUInt64();
+    CLOG_C_DEBUG(&self->log, "connect request nonce %" PRIX64, self->connectRequestNonce)
     self->remoteConnectionId = 0;
 
     if (maximumSingleParticipantStepOctetCount > NimbleStepMaxSingleStepOctetCount) {
@@ -110,8 +112,6 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
 
     self->state = NimbleClientStateIdle;
     self->transport = *transport;
-
-
 
     size_t combinedStepOctetCount = nbsStepsOutSerializeCalculateCombinedSize(maximumNumberOfParticipants,
                                                                               maximumSingleParticipantStepOctetCount);
@@ -209,14 +209,13 @@ int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDev
     return -1;
 }
 
-
-
 static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
 {
     if (self->lastUpdateMonotonicMsIsSet) {
         MonotonicTimeMs encounteredTickDuration = now - self->lastUpdateMonotonicMs;
         if (encounteredTickDuration + 10 < (int) self->expectedTickDurationMs) {
-            //CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %" PRIi64, encounteredTickDuration)
+            // CLOG_C_VERBOSE(&self->log, "updating too often, time in ms since last update: %" PRIi64,
+            // encounteredTickDuration)
             return;
         }
         statsIntAdd(&self->tickDuration, (int) encounteredTickDuration);
@@ -232,15 +231,13 @@ static void checkTickInterval(NimbleClient* self, MonotonicTimeMs now)
     self->lastUpdateMonotonicMs = now;
 }
 
-
 static void checkIfDisconnectIsNeeded(NimbleClient* self)
 {
     if (self->state != NimbleClientStateSynced) {
         return;
     }
 
-    if (nimbleClientConnectionQualityShouldDisconnect(&self->quality))
-    {
+    if (nimbleClientConnectionQualityShouldDisconnect(&self->quality)) {
         self->state = NimbleClientStateDisconnected;
     }
 }
