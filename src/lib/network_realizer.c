@@ -49,7 +49,7 @@ void nimbleClientRealizeJoinGame(NimbleClientRealize* self, NimbleSerializeJoinG
 {
     request.nonce = self->joinGameRequestNonce++;
     self->client.joinGameRequest = request;
-    CLOG_C_DEBUG(&self->client.log, "setting state to join game. join type: %d, secret:%" PRIX64,
+    CLOG_C_DEBUG(&self->client.log, "setting state to join game. join type: %u, secret:%" PRIX64,
                  request.joinGameType, request.connectionSecret)
     self->targetState = NimbleClientRealizeStateSynced;
     self->client.joinParticipantPhase = NimbleJoiningStateJoiningParticipant;
