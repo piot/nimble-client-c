@@ -68,8 +68,8 @@ static bool calculateOptimalSendPredictionTickCount(const NimbleClient* self, si
 
     optimalSendPredictionTickCount += bufferDeltaAddTickCount;
 
-    if (self->loggingTickCount % 20 == 0) {
-        CLOG_C_DEBUG(&self->log, "latency: %zu ms (count:%zu). bufferDelta:%d (count:%zu). totalTickCount:%zu",
+    if (self->loggingTickCount % 60 == 0) {
+        CLOG_C_VERBOSE(&self->log, "latency: %zu ms (count:%zu). bufferDelta:%d (count:%zu). totalTickCount:%zu",
                      unsignedLatency, latencyInTicksRoundedUp, bufferDeltaAverage, bufferDeltaAddTickCount,
                      optimalSendPredictionTickCount)
     }
