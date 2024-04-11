@@ -51,7 +51,7 @@ void nimbleClientReset(NimbleClient* self)
         nimbleClientGameStateDestroy(&self->joinedGameState);
     }
     self->joinedGameState.gameState = 0;
-    self->downloadStateClientRequestId = (uint8_t) secureRandomUInt64();
+    self->downloadStateClientRequestId = 1;
     nimbleClientConnectionQualityReset(&self->quality);
     orderedDatagramInLogicInit(&self->orderedDatagramIn);
     orderedDatagramOutLogicInit(&self->orderedDatagramOut);
