@@ -10,6 +10,7 @@
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
 #include <nimble-client/prepare_header.h>
+#include <datagram-transport/types.h>
 
 static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
@@ -57,10 +58,9 @@ static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 /// @return negative on error
 int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* transportOut)
 {
-#define UDP_MAX_SIZE (1200)
-    uint8_t buf[UDP_MAX_SIZE];
+    uint8_t buf[DATAGRAM_TRANSPORT_MAX_SIZE];
     FldOutStream outStream;
-    fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
+    fldOutStreamInit(&outStream, buf, DATAGRAM_TRANSPORT_MAX_SIZE);
     outStream.writeDebugInfo = true;
 
     FldOutStreamStoredPosition restorePosition;

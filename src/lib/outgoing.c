@@ -12,6 +12,7 @@
 #include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
+#include <datagram-transport/types.h>
 
 static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 {
@@ -106,8 +107,7 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
 
 static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 {
-#define UDP_MAX_SIZE (1200)
-    uint8_t buf[UDP_MAX_SIZE];
+    uint8_t buf[DATAGRAM_TRANSPORT_MAX_SIZE];
 
     switch (self->state) {
         case NimbleClientStateIdle:
@@ -130,7 +130,7 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
             }
 
             FldOutStream outStream;
-            fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
+            fldOutStreamInit(&outStream, buf, DATAGRAM_TRANSPORT_MAX_SIZE);
             outStream.writeDebugInfo = true; // self->useDebugStreams;
             if (self->state == NimbleClientStateRequestingConnect) {
                 nimbleClientPrepareOobHeader(self, &outStream);
