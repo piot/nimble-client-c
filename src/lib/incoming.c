@@ -61,15 +61,14 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
         return result;
     }
 
-    if (self->state != NimbleClientStateRequestingConnect) {
-        CLOG_C_NOTICE(&self->log, "we received a packet with connection ID, but we are not connected. ignoring.")
-    }
-
     if (self->remoteConnectionId != connectionId) {
         CLOG_C_NOTICE(&self->log, "wrong remote connection ID, encountered %hhu, expected %hhu, ignoring packet", connectionId, self->remoteConnectionId)
         return 0;
     }
-
+    if (self->state == NimbleClientStateDisconnected) {
+        CLOG_C_NOTICE(&self->log, "we received a packet with connection ID, but we are not connected. ignoring.")
+        return 0;
+    }
     int verifyStatus = connectionLayerIncomingVerify(&self->connectionLayerIncoming, &inStream);
     if (verifyStatus < 0) {
         CLOG_C_NOTICE(&self->log, "packet could not be verified, maybe previous connection? ignoring")

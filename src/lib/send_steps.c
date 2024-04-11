@@ -67,7 +67,7 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     nimbleClientPrepareHeader(self, &outStream, &restorePosition);
 
     ssize_t stepsSent = sendStepsToStream(self, &outStream);
-    if (stepsSent < 0) {
+    if (stepsSent <= 0) {
         return (int)stepsSent;
     }
 

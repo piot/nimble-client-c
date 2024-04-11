@@ -11,6 +11,7 @@ struct FldOutStreamStoredPosition;
 
 int nimbleClientPrepareHeader(struct NimbleClient* self, struct FldOutStream* outStream,
                               struct FldOutStreamStoredPosition* outStreamStoredPosition);
+int nimbleClientPrepareOobHeader(struct NimbleClient* self,struct FldOutStream* outStream);
 
 int nimbleClientCommitHeader(NimbleClient* self, FldOutStream* outStream, FldOutStreamStoredPosition writeHashPosition);
 

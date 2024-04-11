@@ -112,6 +112,7 @@ typedef struct NimbleClient {
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
     NimbleSerializeVersion applicationVersion;
+    NimbleSerializeNonce connectRequestNonce;
     Clog log;
 
     bool lastUpdateMonotonicMsIsSet;

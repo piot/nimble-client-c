@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------------------*/
 #include <clog/clog.h>
 #include <flood/out_stream.h>
+#include <monotonic-time/lower_bits.h>
 #include <nimble-client/client.h>
 #include <nimble-client/debug.h>
 #include <nimble-client/outgoing.h>
-#include <nimble-client/send_steps.h>
 #include <nimble-client/prepare_header.h>
+#include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
-#include <monotonic-time/lower_bits.h>
 
 static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
 {
@@ -34,6 +34,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
     NimbleSerializeConnectRequest connectRequest;
     connectRequest.applicationVersion = self->applicationVersion;
     connectRequest.useDebugStreams = self->wantsDebugStreams;
+    connectRequest.nonce = self->connectRequestNonce;
 
     CLOG_EXECUTE(char buf[32]; char buf2[32];)
     CLOG_C_DEBUG(&self->log,
@@ -72,7 +73,7 @@ static int sendJoinGameRequest(NimbleClient* self, FldOutStream* stream)
 
 static int updateSyncedSubState(NimbleClient* self, FldOutStream* outStream)
 {
-    //CLOG_C_VERBOSE(&self->log, "participant phase: %d", self->joinParticipantPhase)
+    // CLOG_C_VERBOSE(&self->log, "participant phase: %d", self->joinParticipantPhase)
     switch (self->joinParticipantPhase) {
         case NimbleJoiningStateJoiningParticipant:
             return sendJoinGameRequest(self, outStream);
@@ -87,7 +88,7 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
 {
     switch (self->state) {
         case NimbleClientStateRequestingConnect:
-            return sendConnectRequest(self, outStream);
+            CLOG_ERROR("wrong state for send message")
         case NimbleClientStateConnected:
             return 0;
         case NimbleClientStateJoiningRequestingState:
@@ -117,6 +118,7 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
             return 0;
 
         case NimbleClientStateRequestingConnect:
+
         case NimbleClientStateJoiningRequestingState:
         case NimbleClientStateJoiningDownloadingState:
         case NimbleClientStateSynced: {
@@ -129,26 +131,36 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
 
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, UDP_MAX_SIZE);
-            outStream.writeDebugInfo = true; //self->useDebugStreams;
+            outStream.writeDebugInfo = true; // self->useDebugStreams;
+            if (self->state == NimbleClientStateRequestingConnect) {
+                nimbleClientPrepareOobHeader(self, &outStream);
+                int result = sendConnectRequest(self, &outStream);
+                if (result < 0) {
+                    return result;
+                }
+            } else {
 
-            FldOutStreamStoredPosition restorePosition;
-            nimbleClientPrepareHeader(self, &outStream, &restorePosition );
+                FldOutStreamStoredPosition restorePosition;
+                nimbleClientPrepareHeader(self, &outStream, &restorePosition);
 
-            int result = sendMessageUsingStream(self, &outStream);
-            if (result < 0) {
-                return result;
+                int result = sendMessageUsingStream(self, &outStream);
+                if (result < 0) {
+                    return result;
+                }
+
+                result = nimbleClientCommitHeader(self, &outStream, restorePosition);
+                if (result < 0) {
+                    return result;
+                }
+
+                orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
             }
 
-            result = nimbleClientCommitHeader(self, &outStream, restorePosition);
-            if (result < 0) {
-                return result;
-            }
-
-            if (outStream.pos <= 4) {
+            if (outStream.pos <= 10) {
                 return 0;
             }
 
-            orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
+
             statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
             return transportOut->send(transportOut->self, outStream.octets, outStream.pos);
         }
