@@ -99,8 +99,7 @@ typedef struct NimbleClient {
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobStreamAllocator;
 
-    uint8_t participantsConnectionIndex;
-    NimbleSerializeParticipantConnectionSecret participantsConnectionSecret;
+    NimbleSerializePartyAndSessionSecret partyAndSessionSecret;
 
     NimbleSerializeJoinGameRequest joinGameRequest;
 
