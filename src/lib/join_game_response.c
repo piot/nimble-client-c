@@ -37,7 +37,7 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
     }
 
     CLOG_C_DEBUG(&self->log, "join game response. party %d participant count: %zu",
-                 self->partyAndSessionSecret.participantPartyId, self->localParticipantCount)
+                 self->partyAndSessionSecret.partyId, self->localParticipantCount)
 
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;
