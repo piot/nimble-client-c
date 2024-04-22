@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 #include <flood/in_stream.h>
+#include <inttypes.h>
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/client_in.h>
-#include <inttypes.h>
 
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
 /// @param self nimble protocol client
@@ -34,10 +34,13 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
         NimbleClientParticipantEntry* localParticipant = &self->localParticipantLookup[i];
         localParticipant->localUserDeviceIndex = (uint8_t) responseParticipant->localIndex;
         localParticipant->participantId = (uint8_t) responseParticipant->participantId;
+        localParticipant->isUsed = true;
+        CLOG_C_INFO(&self->log, "local participant %hhu (local index %hhu) has joined", localParticipant->participantId,
+                    localParticipant->localUserDeviceIndex)
     }
 
-    CLOG_C_DEBUG(&self->log, "join game response. party %d participant count: %zu",
-                 self->partyAndSessionSecret.partyId, self->localParticipantCount)
+    CLOG_C_DEBUG(&self->log, "join game response. party %d participant count: %zu", self->partyAndSessionSecret.partyId,
+                 self->localParticipantCount)
 
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;

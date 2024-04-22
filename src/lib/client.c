@@ -25,6 +25,7 @@ void nimbleClientReset(NimbleClient* self)
 
     self->localParticipantCount = 0;
     for (size_t i = 0; i < NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT; ++i) {
+        self->localParticipantLookup[i].isUsed = false;
         self->localParticipantLookup[i].participantId = 0;
         self->localParticipantLookup[i].localUserDeviceIndex = 0;
     }
@@ -198,7 +199,8 @@ static int sendPackets(NimbleClient* self)
 int nimbleClientFindParticipantId(const NimbleClient* self, uint8_t localUserDeviceIndex, uint8_t* participantId)
 {
     for (size_t i = 0; i < self->localParticipantCount; ++i) {
-        if (self->localParticipantLookup[i].localUserDeviceIndex == localUserDeviceIndex) {
+        const NimbleClientParticipantEntry* localParticipant = &self->localParticipantLookup[i];
+        if (localParticipant->localUserDeviceIndex == localUserDeviceIndex) {
             *participantId = self->localParticipantLookup[i].participantId;
             return 1;
         }
