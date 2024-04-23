@@ -39,9 +39,9 @@ ssize_t nimbleClientOnGameStepResponse(NimbleClient* self, FldInStream* inStream
         self->receivedStepIdByServerOnlyForDebug = serverReceivedPredictedStepId;
     }
 
-    nbsStepsDiscardUpTo(&self->outSteps, serverReceivedPredictedStepId + 1);
+    CLOG_C_VERBOSE(&self->log, "server has received predicted step %08X, discarding out steps before that", serverReceivedPredictedStepId)
 
-    CLOG_C_VERBOSE(&self->log, "server has received predicted step %08X", serverReceivedPredictedStepId)
+    nbsStepsDiscardUpTo(&self->outSteps, serverReceivedPredictedStepId + 1);
 
     ssize_t stepCount = nbsPendingStepsInSerialize(inStream, &self->authoritativePendingStepsFromServer);
     if (stepCount < 0) {

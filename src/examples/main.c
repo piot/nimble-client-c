@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
             data.participantCount = 1;
             uint8_t stepBuf[64];
 
-            ssize_t octetLength = nbsStepsOutSerializeStep(&data, stepBuf, 64);
+            ssize_t octetLength = nbsStepsOutSerializeCombinedStep(&data, stepBuf, 64);
             if (octetLength < 0) {
                 return (int)octetLength;
             }
