@@ -25,8 +25,8 @@ int nimbleClientOnConnectResponse(NimbleClient* self, FldInStream* inStream)
         self->useDebugStreams = response.useDebugStreams;
         self->remoteConnectionId = response.connectionId;
         CLOG_ASSERT(self->remoteConnectionId != 0, "remote connection assigned can not be zero")
-        connectionLayerIncomingInit(&self->connectionLayerIncoming, response.connectionSecret);
-        connectionLayerOutgoingInit(&self->connectionLayerOutgoing, response.connectionSecret);
+        connectionLayerIncomingInit(&self->connectionLayerIncoming, (uint32_t)response.connectionSecret);
+        connectionLayerOutgoingInit(&self->connectionLayerOutgoing, (uint32_t)response.connectionSecret);
         CLOG_C_DEBUG(&self->log, "connected. remote connectionId:%hhu debug streams: %d", self->remoteConnectionId, self->useDebugStreams)
     }
 
