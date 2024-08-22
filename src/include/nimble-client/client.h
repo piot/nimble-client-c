@@ -51,6 +51,7 @@ typedef enum NimbleJoiningState {
 #define NIMBLE_CLIENT_MAX_LOCAL_USERS_COUNT (8)
 
 typedef struct NimbleClientParticipantEntry {
+    bool isUsed;
     uint8_t localUserDeviceIndex;
     uint8_t participantId;
 } NimbleClientParticipantEntry;
@@ -99,8 +100,7 @@ typedef struct NimbleClient {
     struct ImprintAllocator* memory;
     struct ImprintAllocatorWithFree* blobStreamAllocator;
 
-    uint8_t participantsConnectionIndex;
-    NimbleSerializeParticipantConnectionSecret participantsConnectionSecret;
+    NimbleSerializePartyAndSessionSecret partyAndSessionSecret;
 
     NimbleSerializeJoinGameRequest joinGameRequest;
 

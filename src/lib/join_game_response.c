@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 #include <flood/in_stream.h>
+#include <inttypes.h>
 #include <nimble-client/client.h>
 #include <nimble-client/join_game_response.h>
 #include <nimble-serialize/client_in.h>
-#include <inttypes.h>
 
 /// Handle join game response (NimbleSerializeCmdJoinGameResponse) from server.
 /// @param self nimble protocol client
@@ -26,17 +26,21 @@ int nimbleClientOnJoinGameResponse(NimbleClient* self, FldInStream* inStream)
         return 0;
     }
 
-    self->participantsConnectionIndex = gameResponse.participantConnectionIndex;
-    self->participantsConnectionSecret = gameResponse.participantConnectionSecret;
+    self->partyAndSessionSecret = gameResponse.partyAndSessionSecret;
     self->localParticipantCount = gameResponse.participantCount;
 
     for (size_t i = 0; i < gameResponse.participantCount; ++i) {
-        self->localParticipantLookup[i].localUserDeviceIndex = (uint8_t) gameResponse.participants[i].localIndex;
-        self->localParticipantLookup[i].participantId = (uint8_t) gameResponse.participants[i].id;
+        const NimbleSerializeJoinGameResponseParticipant* responseParticipant = &gameResponse.participants[i];
+        NimbleClientParticipantEntry* localParticipant = &self->localParticipantLookup[i];
+        localParticipant->localUserDeviceIndex = (uint8_t) responseParticipant->localIndex;
+        localParticipant->participantId = (uint8_t) responseParticipant->participantId;
+        localParticipant->isUsed = true;
+        CLOG_C_INFO(&self->log, "local participant %hhu (local index %hhu) has joined", localParticipant->participantId,
+                    localParticipant->localUserDeviceIndex)
     }
 
-    CLOG_C_DEBUG(&self->log, "join game response. connection index %d participant count: %zu secret: %" PRIX64,
-                 self->participantsConnectionIndex, self->localParticipantCount, self->participantsConnectionSecret)
+    CLOG_C_DEBUG(&self->log, "join game response. party %d participant count: %zu", self->partyAndSessionSecret.partyId,
+                 self->localParticipantCount)
 
     self->joinParticipantPhase = NimbleJoiningStateJoinedParticipant;
     self->waitTime = 0;
