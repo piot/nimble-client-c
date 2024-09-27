@@ -87,8 +87,8 @@ int nimbleClientInit(NimbleClient* self, struct ImprintAllocator* memory,
     self->useDebugStreams = false;
     self->wantsDebugStreams = wantsDebugStreams;
     self->applicationVersion = applicationVersion;
-    self->connectRequestNonce = secureRandomUInt64();
-    CLOG_C_DEBUG(&self->log, "connect request nonce %" PRIX64, self->connectRequestNonce)
+    self->connectRequestId = 0;
+    CLOG_C_DEBUG(&self->log, "connect request nonce %02X", self->connectRequestId)
     self->remoteConnectionId = 0;
 
     if (maximumSingleParticipantStepOctetCount > NimbleStepMaxSingleStepOctetCount) {

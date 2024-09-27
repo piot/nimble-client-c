@@ -9,10 +9,7 @@ struct NimbleClient;
 struct FldOutStream;
 struct FldOutStreamStoredPosition;
 
-int nimbleClientPrepareHeader(struct NimbleClient* self, struct FldOutStream* outStream,
-                              struct FldOutStreamStoredPosition* outStreamStoredPosition);
-int nimbleClientPrepareOobHeader(struct NimbleClient* self,struct FldOutStream* outStream);
-
-int nimbleClientCommitHeader(NimbleClient* self, FldOutStream* outStream, FldOutStreamStoredPosition writeHashPosition);
+int nimbleClientWriteHeader(struct NimbleClient* self, struct FldOutStream* outStream);
+void nimbleClientCommitHeader(struct NimbleClient* self);
 
 #endif

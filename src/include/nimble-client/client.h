@@ -8,8 +8,6 @@
 #include <blob-stream/blob_stream_logic_in.h>
 #include <blob-stream/blob_stream_logic_out.h>
 #include <clog/clog.h>
-#include <connection-layer/incoming.h>
-#include <connection-layer/outgoing.h>
 #include <datagram-transport/transport.h>
 #include <lagometer/lagometer.h>
 #include <nimble-client/connection_quality.h>
@@ -106,13 +104,11 @@ typedef struct NimbleClient {
 
     OrderedDatagramOutLogic orderedDatagramOut;
     OrderedDatagramInLogic orderedDatagramIn;
-    ConnectionLayerIncoming connectionLayerIncoming;
-    ConnectionLayerOutgoing connectionLayerOutgoing;
 
     size_t maximumSingleParticipantStepOctetCount;
     size_t maximumNumberOfParticipants;
     NimbleSerializeVersion applicationVersion;
-    NimbleSerializeNonce connectRequestNonce;
+    NimbleSerializeClientRequestId connectRequestId;
     Clog log;
 
     bool lastUpdateMonotonicMsIsSet;

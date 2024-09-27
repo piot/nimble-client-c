@@ -3,14 +3,14 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 #include <clog/clog.h>
+#include <datagram-transport/types.h>
 #include <flood/out_stream.h>
 #include <nimble-client/client.h>
+#include <nimble-client/prepare_header.h>
 #include <nimble-client/send_steps.h>
 #include <nimble-serialize/serialize.h>
 #include <nimble-steps-serialize/out_serialize.h>
 #include <nimble-steps-serialize/pending_out_serialize.h>
-#include <nimble-client/prepare_header.h>
-#include <datagram-transport/types.h>
 
 static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
 {
@@ -37,7 +37,8 @@ static ssize_t sendStepsToStream(NimbleClient* self, FldOutStream* stream)
         return stepsActuallySent;
     }
 
-    //    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X", self->nextStepIdToSendToServer)
+    //    CLOG_C_VERBOSE(&self->log, "outSteps: sent out steps, discard old ones before %08X",
+    //    self->nextStepIdToSendToServer)
 
     int stepsInBuffer = (int) self->outSteps.stepsCount - (int) NimbleSerializeMaxRedundancyCount;
     if (stepsInBuffer < 0) {
@@ -63,20 +64,13 @@ int nimbleClientSendStepsToServer(NimbleClient* self, DatagramTransportOut* tran
     fldOutStreamInit(&outStream, buf, DATAGRAM_TRANSPORT_MAX_SIZE);
     outStream.writeDebugInfo = true;
 
-    FldOutStreamStoredPosition restorePosition;
-    nimbleClientPrepareHeader(self, &outStream, &restorePosition);
+    nimbleClientWriteHeader(self, &outStream);
 
     ssize_t stepsSent = sendStepsToStream(self, &outStream);
     if (stepsSent <= 0) {
-        return (int)stepsSent;
+        return (int) stepsSent;
     }
-
-    int status = nimbleClientCommitHeader(self, &outStream, restorePosition);
-    if (status < 0) {
-        return status;
-    }
-
-    orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
+    nimbleClientCommitHeader(self);
     CLOG_C_VERBOSE(&self->log, "send steps to server octetCount: %zu", outStream.pos)
     statsIntPerSecondAdd(&self->sentStepsDatagramCountPerSecond, 1);
     statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);

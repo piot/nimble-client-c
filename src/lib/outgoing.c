@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------------------*/
 #include <clog/clog.h>
+#include <datagram-transport/types.h>
 #include <flood/out_stream.h>
 #include <monotonic-time/lower_bits.h>
 #include <nimble-client/client.h>
@@ -12,15 +13,13 @@
 #include <nimble-client/send_steps.h>
 #include <nimble-serialize/debug.h>
 #include <nimble-serialize/serialize.h>
-#include <datagram-transport/types.h>
 
-static int sendDownloadStateAck(NimbleClient* self, FldOutStream* stream)
+static int sendBlobStreamCommands(NimbleClient* self, FldOutStream* stream)
 {
     CLOG_C_VERBOSE(&self->log, "game state ack to server on channel %04X. Game State is downloading to the client",
                    self->joinStateChannel)
 
-    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdDownloadGameStateStatus, &self->log);
-    nimbleSerializeOutBlobStreamChannelId(stream, self->joinStateChannel);
+    nimbleSerializeWriteCommand(stream, NimbleSerializeCmdClientOutBlobStream, &self->log);
     int errorCode = blobStreamLogicInSend(&self->blobStreamInLogic, stream);
     if (errorCode < 0) {
         return errorCode;
@@ -35,7 +34,7 @@ static int sendConnectRequest(NimbleClient* self, FldOutStream* stream)
     NimbleSerializeConnectRequest connectRequest;
     connectRequest.applicationVersion = self->applicationVersion;
     connectRequest.useDebugStreams = self->wantsDebugStreams;
-    connectRequest.nonce = self->connectRequestNonce;
+    connectRequest.clientRequestId = self->connectRequestId;
 
     CLOG_EXECUTE(char buf[32]; char buf2[32];)
     CLOG_C_DEBUG(&self->log,
@@ -89,13 +88,13 @@ static TC_FORCE_INLINE int sendMessageUsingStream(NimbleClient* self, FldOutStre
 {
     switch (self->state) {
         case NimbleClientStateRequestingConnect:
-            CLOG_ERROR("wrong state for send message")
+            return sendConnectRequest(self, outStream);
         case NimbleClientStateConnected:
             return 0;
         case NimbleClientStateJoiningRequestingState:
             return sendStartDownloadStateRequest(self, outStream);
         case NimbleClientStateJoiningDownloadingState:
-            return sendDownloadStateAck(self, outStream);
+            return sendBlobStreamCommands(self, outStream);
         case NimbleClientStateIdle:
             return 0;
         case NimbleClientStateDisconnected:
@@ -132,34 +131,18 @@ static int handleState(NimbleClient* self, DatagramTransportOut* transportOut)
             FldOutStream outStream;
             fldOutStreamInit(&outStream, buf, DATAGRAM_TRANSPORT_MAX_SIZE);
             outStream.writeDebugInfo = true; // self->useDebugStreams;
-            if (self->state == NimbleClientStateRequestingConnect) {
-                nimbleClientPrepareOobHeader(self, &outStream);
-                int result = sendConnectRequest(self, &outStream);
-                if (result < 0) {
-                    return result;
-                }
-            } else {
+            nimbleClientWriteHeader(self, &outStream);
 
-                FldOutStreamStoredPosition restorePosition;
-                nimbleClientPrepareHeader(self, &outStream, &restorePosition);
-
-                int result = sendMessageUsingStream(self, &outStream);
-                if (result < 0) {
-                    return result;
-                }
-
-                result = nimbleClientCommitHeader(self, &outStream, restorePosition);
-                if (result < 0) {
-                    return result;
-                }
-
-                orderedDatagramOutLogicCommit(&self->orderedDatagramOut);
+            int result = sendMessageUsingStream(self, &outStream);
+            if (result < 0) {
+                return result;
             }
+
+            nimbleClientCommitHeader(self);
 
             if (outStream.pos <= 10) {
                 return 0;
             }
-
 
             statsIntPerSecondAdd(&self->packetsPerSecondOut, 1);
             return transportOut->send(transportOut->self, outStream.octets, outStream.pos);

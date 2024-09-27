@@ -22,9 +22,6 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     nimbleSerializeInStateId(inStream, &stateId);
 
-    uint32_t octetCount;
-    fldInStreamReadUInt32(inStream, &octetCount);
-
     NimbleSerializeBlobStreamChannelId channelId;
     int errorCode = nimbleSerializeInBlobStreamChannelId(inStream, &channelId);
     if (errorCode < 0) {
@@ -44,11 +41,8 @@ int nimbleClientOnDownloadGameStateResponse(NimbleClient* self, FldInStream* inS
 
     self->joinStateChannel = channelId;
 
-    CLOG_C_VERBOSE(&self->log, "rejoin answer: stateId: %04X octetCount:%u channel:%02X", stateId, octetCount, channelId)
+    CLOG_C_VERBOSE(&self->log, "rejoin answer: stateId: %04X channel:%02X", stateId,channelId)
 
-    blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE,
-                     self->log);
-    blobStreamLogicInInit(&self->blobStreamInLogic, &self->blobStreamIn);
 
     self->joinedGameState.stepId = stateId;
     self->joinStateId = stateId;

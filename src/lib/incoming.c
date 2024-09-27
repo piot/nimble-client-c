@@ -44,34 +44,8 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
         return -1;
     }
 
-    uint8_t connectionId;
-    fldInStreamReadUInt8(&inStream, &connectionId);
-
-    if (connectionId == 0) {
-        uint8_t cmd;
-        fldInStreamReadUInt8(&inStream, &cmd);
-        CLOG_C_VERBOSE(&self->log, "incoming oob command: %s", nimbleSerializeCmdToString(cmd))
-        int result = -1;
-        switch (cmd) {
-            case NimbleSerializeCmdConnectResponse:
-                result = nimbleClientOnConnectResponse(self, &inStream);
-                break;
-        }
-
-        return result;
-    }
-
-    if (self->remoteConnectionId != connectionId) {
-        CLOG_C_VERBOSE(&self->log, "wrong remote connection ID, encountered %hhu, expected %hhu, ignoring packet", connectionId, self->remoteConnectionId)
-        return 0;
-    }
     if (self->state == NimbleClientStateDisconnected) {
-        CLOG_C_VERBOSE(&self->log, "we received a packet with connection ID, but we are not connected. ignoring.")
-        return 0;
-    }
-    int verifyStatus = connectionLayerIncomingVerify(&self->connectionLayerIncoming, &inStream);
-    if (verifyStatus < 0) {
-        CLOG_C_VERBOSE(&self->log, "datagram could not be verified, maybe previous connection? ignoring")
+        CLOG_C_VERBOSE(&self->log, "we received a packet, but we are not connected. ignoring.")
         return 0;
     }
 
@@ -98,7 +72,10 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     int result = -1;
     switch (cmd) {
-        case NimbleSerializeCmdGameStatePart:
+        case NimbleSerializeCmdConnectResponse:
+            result = nimbleClientOnConnectResponse(self, &inStream);
+            break;
+        case NimbleSerializeCmdServerOutBlobStream:
             result = nimbleClientOnDownloadGameStatePart(self, &inStream);
             break;
         case NimbleSerializeCmdGameStepResponse:
@@ -126,3 +103,10 @@ int nimbleClientFeed(NimbleClient* self, const uint8_t* data, size_t len)
 
     return result;
 }
+
+/* TODO:
+  blobStreamInInit(&self->blobStreamIn, self->memory, self->blobStreamAllocator, octetCount, BLOB_STREAM_CHUNK_SIZE,
+self->log);
+blobStreamLogicInInit(&self->blobStreamInLogic, &self->blobStreamIn);
+
+ */
